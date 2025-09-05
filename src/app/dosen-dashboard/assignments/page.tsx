@@ -47,8 +47,13 @@ const submissions = [
 
 export default function AssignmentsPage() {
     const searchParams = useSearchParams();
-    const tab = searchParams.get("tab");
-    const [selectedTask, setSelectedTask] = React.useState<(typeof tasks)[0] | null>(null);
+    const tab = searchParams.get("tab") || "manage";
+    const [activeTab, setActiveTab] = React.useState(tab);
+    const [selectedTask, setSelectedTask] = React.useState<(typeof tasks)[0] | null>(tasks[1]);
+
+    React.useEffect(() => {
+        setActiveTab(tab);
+    }, [tab]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -57,7 +62,7 @@ export default function AssignmentsPage() {
         <p className="text-muted-foreground">Buat, distribusikan, dan nilai tugas mahasiswa dengan bantuan AI.</p>
       </div>
 
-      <Tabs defaultValue={tab || "manage"} value={tab || "manage"} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="manage">Daftar Tugas</TabsTrigger>
           <TabsTrigger value="create">Buat Tugas Baru</TabsTrigger>
@@ -100,25 +105,9 @@ export default function AssignmentsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="flex gap-2">
-                        <Sheet>
-                          <SheetTrigger asChild>
-                              <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
-                          </SheetTrigger>
-                          <SheetContent className="w-[400px] sm:w-[540px]">
-                            <SheetHeader>
-                            <SheetTitle>Detail Tugas: {task.name}</SheetTitle>
-                            <SheetDescription>
-                                Informasi lengkap mengenai tugas, termasuk deskripsi, materi, dan daftar mahasiswa yang sudah & belum mengumpulkan.
-                            </SheetDescription>
-                            </SheetHeader>
-                            <div className="py-4 space-y-4">
-                                <p className="text-sm text-muted-foreground">
-                                    <strong>Deskripsi:</strong> Analisis kasus klinis terkait gangguan sistem saraf. Jelaskan patofisiologi, diagnosis, dan penanganan yang relevan berdasarkan materi yang telah diberikan.
-                                </p>
-                                <p className="text-sm text-muted-foreground"><strong>Batas Waktu:</strong> {task.deadline}</p>
-                            </div>
-                          </SheetContent>
-                        </Sheet>
+                        <Button variant="outline" size="icon" onClick={() => {setSelectedTask(task); setActiveTab('grade')}}>
+                            <Eye className="h-4 w-4" />
+                        </Button>
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant="outline" size="icon"><Edit className="h-4 w-4" /></Button>
@@ -292,3 +281,5 @@ export default function AssignmentsPage() {
     </div>
   )
 }
+
+    
