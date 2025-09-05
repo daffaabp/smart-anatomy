@@ -51,7 +51,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
                     <Image
-                        src={`https://i.pravatar.cc/150?u=${user.name}`}
+                        src={`https://i.pravatar.cc/150?u=${encodeURIComponent(user.name)}`}
                         width={36}
                         height={36}
                         alt="Avatar"
