@@ -42,10 +42,18 @@ export default function AssignmentsPage() {
     const defaultTab = searchParams.get("tab") || "manage";
     const [activeTab, setActiveTab] = React.useState(defaultTab);
     const [selectedTask, setSelectedTask] = React.useState<(typeof tasks)[0] | null>(tasks[1]);
+    const [rubric, setRubric] = React.useState("");
 
     React.useEffect(() => {
         setActiveTab(defaultTab);
     }, [defaultTab]);
+
+    const handleGenerateRubric = () => {
+        // In a real app, you would call an AI flow here.
+        // For now, we simulate the AI response.
+        const exampleRubric = `1. Ketepatan Diagnosis (30%)\n   - Mampu mengidentifikasi kondisi pasien dengan benar.\n\n2. Kedalaman Analisis Patofisiologi (30%)\n   - Penjelasan mekanisme penyakit yang komprehensif.\n\n3. Relevansi Penanganan (30%)\n   - Usulan tindakan medis sesuai dengan diagnosis dan pedoman.\n\n4. Kejelasan Bahasa dan Struktur (10%)\n   - Laporan ditulis dengan bahasa yang jelas, terstruktur, dan bebas dari kesalahan tik.`;
+        setRubric(exampleRubric);
+    };
 
   return (
     <div className="flex flex-col gap-8">
@@ -165,11 +173,12 @@ export default function AssignmentsPage() {
                             <Input id="task-title" placeholder="cth. Laporan Praktikum Sistem Saraf" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="task-description">Deskripsi Tugas</Label>
-                            <Textarea id="task-description" placeholder="Jelaskan detail tugas, tujuan, dan instruksi pengerjaan." className="min-h-[150px]" />
+                            <Label htmlFor="task-description">Deskripsi & Instruksi Tugas</Label>
+                            <Textarea id="task-description" placeholder="Jelaskan secara detail tujuan tugas, instruksi pengerjaan, dan format output yang diharapkan (misal: laporan dalam format .pdf)." className="min-h-[150px]" />
                         </div>
                         <div className="space-y-2">
                             <Label>Materi Pendukung (Opsional)</Label>
+                             <CardDescription className="text-xs">Upload file referensi untuk mahasiswa (misal: studi kasus, jurnal, slide).</CardDescription>
                             <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                     <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
@@ -185,9 +194,16 @@ export default function AssignmentsPage() {
                     <div className="space-y-4">
                          <div className="space-y-2">
                             <Label>Rubrik Penilaian</Label>
-                            <Textarea id="task-rubric" placeholder="Tulis kriteria penilaian disini, atau biarkan AI membuatnya untuk Anda." className="min-h-[268px]" />
+                             <CardDescription className="text-xs">Definisikan kriteria penilaian untuk tugas ini. Klik tombol di bawah untuk bantuan AI.</CardDescription>
+                            <Textarea 
+                                id="task-rubric"
+                                value={rubric}
+                                onChange={(e) => setRubric(e.target.value)}
+                                placeholder="cth.&#10;1. Ketepatan Analisis (40%)&#10;2. Penggunaan Referensi (30%)&#10;3. Struktur Laporan (20%)&#10;4. Kejelasan Bahasa (10%)" 
+                                className="min-h-[284px]" 
+                            />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleGenerateRubric}>
                             <Bot className="mr-2 h-4 w-4" /> Buat Rubrik dengan AI
                         </Button>
                     </div>
@@ -273,3 +289,5 @@ export default function AssignmentsPage() {
     </div>
   )
 }
+
+    

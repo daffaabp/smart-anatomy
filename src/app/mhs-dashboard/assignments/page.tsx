@@ -1,9 +1,12 @@
+
 "use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, CheckCircle, Clock, FileText, Paperclip, UploadCloud } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
 
 const assignments = [
   { 
@@ -43,35 +46,46 @@ export default function StudentAssignmentsPage() {
         <p className="text-muted-foreground">Lihat, kerjakan, dan kumpulkan tugas Anda di sini.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {assignments.map((task) => (
-          <Card key={task.id} className="flex flex-col">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                 <CardTitle className="text-lg leading-tight">{task.title}</CardTitle>
-                 <Badge variant={task.statusVariant as any}>{task.status}</Badge>
-              </div>
-              <CardDescription className="flex items-center gap-2 pt-2">
-                <Clock className="w-4 h-4" /> 
-                Batas waktu: {task.deadline}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {task.description}
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link href={`/mhs-dashboard/assignments/${task.id}`} className="w-full">
-                <Button className="w-full">
-                  {task.actionText}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nama Tugas</TableHead>
+                <TableHead>Batas Waktu</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {assignments.map((task) => (
+                <TableRow key={task.id}>
+                  <TableCell className="font-medium">{task.title}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        {task.deadline}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={task.statusVariant as any}>{task.status}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link href={`/mhs-dashboard/assignments/${task.id}`} className="w-full">
+                        <Button variant="outline" size="sm">
+                            {task.actionText}
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }
+
+    

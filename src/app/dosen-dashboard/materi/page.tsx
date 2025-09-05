@@ -4,10 +4,13 @@ import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookUp, FileText, Film, GripVertical, Link as LinkIcon, PenSquare, PlusCircle, Trash2 } from "lucide-react";
+import { BookUp, FileText, Film, GripVertical, Link as LinkIcon, PenSquare, PlusCircle, Trash2, UploadCloud } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { useSearchParams } from "next/navigation";
+
 
 const courseStructure = [
     {
@@ -48,6 +51,9 @@ const getIcon = (type: string) => {
 }
 
 export default function DosenMateriPage() {
+    const searchParams = useSearchParams();
+    const createNew = searchParams.get('new');
+
     return (
         <div className="flex flex-col gap-8">
             <div className="flex justify-between items-center">
@@ -55,7 +61,7 @@ export default function DosenMateriPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Struktur Mata Kuliah</h1>
                     <p className="text-muted-foreground">Atur bab dan unggah materi pembelajaran untuk kelas Anda di sini.</p>
                 </div>
-                <Dialog>
+                 <Dialog>
                     <DialogTrigger asChild>
                         <Button>
                             <PlusCircle className="mr-2 h-4 w-4" /> Tambah Bab Baru
@@ -96,7 +102,7 @@ export default function DosenMateriPage() {
                                             </div>
                                         </div>
                                     </AccordionTrigger>
-                                    <div className="flex items-center gap-2 pr-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                     <div className="flex items-center gap-2 pr-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Button variant="ghost" size="icon"><PenSquare className="h-4 w-4"/></Button>
                                         <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive"/></Button>
                                     </div>
@@ -129,7 +135,34 @@ export default function DosenMateriPage() {
                                                         <DialogTitle>Tambah Materi Baru</DialogTitle>
                                                         <DialogDescription>Upload file atau tambahkan link materi untuk bab ini.</DialogDescription>
                                                     </DialogHeader>
-                                                    {/* Add form for adding material here */}
+                                                    <div className="space-y-4 py-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="material-title">Judul Materi</Label>
+                                                            <Input id="material-title" placeholder="cth. Video Pengantar Sistem Saraf" />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label>Jenis Materi</Label>
+                                                            <Select>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Pilih jenis materi..." />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="document">Dokumen (PDF, Word, dll.)</SelectItem>
+                                                                    <SelectItem value="video">Video (Link)</SelectItem>
+                                                                    <SelectItem value="link">Link Eksternal</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label>File atau Link</Label>
+                                                            <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
+                                                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                                                    <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                                                    <p className="text-sm text-muted-foreground"><span className="font-semibold">Klik untuk upload</span> atau tempel link</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <DialogFooter>
                                                         <DialogClose asChild><Button variant="outline">Batal</Button></DialogClose>
                                                         <Button>Simpan Materi</Button>
@@ -147,3 +180,5 @@ export default function DosenMateriPage() {
         </div>
     )
 }
+
+    
