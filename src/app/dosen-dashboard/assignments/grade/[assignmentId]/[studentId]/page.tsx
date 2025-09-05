@@ -6,11 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Bot, FileText, Loader2, Save, User } from "lucide-react"
+import { Bot, FileText, Loader2, Save, User, FileWarning } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { analyzeTaskSubmission, AnalyzeTaskSubmissionInput } from "@/ai/flows/analyze-student-task-submissions"
 import { useToast } from "@/hooks/use-toast"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type AnalysisResult = {
   aiPreScreeningScore: number;
@@ -20,7 +21,8 @@ type AnalysisResult = {
   suggestedFeedback: string;
 };
 
-export default function GradeSubmissionPage({ params: { studentId, assignmentId } }: { params: { assignmentId: string, studentId: string } }) {
+export default function GradeSubmissionPage({ params }: { params: { assignmentId: string, studentId: string } }) {
+  const { studentId, assignmentId } = params;
   const [analysis, setAnalysis] = React.useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast()
@@ -29,18 +31,37 @@ export default function GradeSubmissionPage({ params: { studentId, assignmentId 
     studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
     [studentId]
   );
-
-  const studentSubmissionText = `Pasien datang dengan keluhan sakit kepala hebat dan kaku kuduk. Pemeriksaan fisik menunjukkan tanda Kernig dan Brudzinski positif. Cairan serebrospinal menunjukkan peningkatan sel darah putih dengan dominasi neutrofil, serta kadar glukosa yang rendah dan protein yang tinggi. Kultur cairan serebrospinal kemudian mengkonfirmasi adanya Streptococcus pneumoniae.
+  
+  const studentSubmission = {
+    text: `Pasien datang dengan keluhan sakit kepala hebat dan kaku kuduk. Pemeriksaan fisik menunjukkan tanda Kernig dan Brudzinski positif. Cairan serebrospinal menunjukkan peningkatan sel darah putih dengan dominasi neutrofil, serta kadar glukosa yang rendah dan protein yang tinggi. Kultur cairan serebrospinal kemudian mengkonfirmasi adanya Streptococcus pneumoniae.
 Diagnosis yang paling mungkin adalah meningitis bakterialis yang disebabkan oleh Streptococcus pneumoniae.
-Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceftriaxone 2 gram setiap 12 jam, dikombinasikan dengan Vancomycin. Dexamethasone juga diberikan sebelum atau bersamaan dengan dosis pertama antibiotik untuk mengurangi respons inflamasi dan risiko komplikasi neurologis. Terapi suportif lainnya termasuk manajemen cairan, pemantauan tanda vital, dan pengelolaan tekanan intrakranial jika diperlukan.`
+Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceftriaxone 2 gram setiap 12 jam, dikombinasikan dengan Vancomycin. Dexamethasone juga diberikan sebelum atau bersamaan dengan dosis pertama antibiotik untuk mengurangi respons inflamasi dan risiko komplikasi neurologis. Terapi suportif lainnya termasuk manajemen cairan, pemantauan tanda vital, dan pengelolaan tekanan intrakranial jika diperlukan.`,
+    file: null as string | null // Placeholder for file submission, e.g., "Jawaban - Ahmad Subarjo.pdf"
+  };
 
   const handleAnalyze = async () => {
     setIsLoading(true);
     setAnalysis(null);
+    
+    // In a real app, you would have a way to get the submission data,
+    // including the file content as a data URI if a file was submitted.
+    // For now, we simulate this. If there's a file, we'd read it and convert to data URI.
+    // Since we don't have a file, we'll just use the text.
+    if (!studentSubmission.text && !studentSubmission.file) {
+      toast({
+        variant: "destructive",
+        title: "Tidak Ada Data",
+        description: "Tidak ada teks atau file yang dikumpulkan oleh mahasiswa.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
         const submissionData: AnalyzeTaskSubmissionInput = {
             taskDescription: "Analisis kasus klinis terkait gangguan sistem saraf. Jelaskan patofisiologi, diagnosis, dan penanganan yang relevan berdasarkan materi yang telah diberikan.",
-            studentSubmission: studentSubmissionText,
+            studentSubmissionText: studentSubmission.text,
+            // submissionFile: In a real app, this would be the data URI of the uploaded file.
             gradingCriteria: "Ketepatan diagnosis (30%), Kedalaman analisis patofisiologi (30%), Relevansi penanganan (30%), Kejelasan bahasa (10%)"
         }
         const result = await analyzeTaskSubmission(submissionData);
@@ -79,9 +100,20 @@ Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceft
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {studentSubmission.file && (
+                    <div className="mb-4 p-3 border rounded-md bg-muted/50 flex items-center gap-3">
+                      <FileText className="w-5 h-5" />
+                      <span className="font-medium">{studentSubmission.file}</span>
+                    </div>
+                  )}
+                  {studentSubmission.text && (
                     <p className="text-muted-foreground whitespace-pre-wrap">
-                      {studentSubmissionText}
+                      {studentSubmission.text}
                     </p>
+                  )}
+                  {!studentSubmission.text && !studentSubmission.file && (
+                    <p className="text-muted-foreground text-center py-4">Mahasiswa tidak mengirimkan jawaban.</p>
+                  )}
                 </CardContent>
             </Card>
             <Card>
@@ -101,7 +133,7 @@ Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceft
                         </div>
                     )}
                     {!isLoading && !analysis && (
-                        <div className="text-center py-10">
+                       <div className="text-center py-10">
                             <p className="text-muted-foreground mb-4">Gagal memuat analisis AI.</p>
                             <Button onClick={handleAnalyze}>
                                 <Bot className="mr-2 h-4 w-4" /> Coba Lagi Analisis AI
@@ -110,6 +142,15 @@ Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceft
                     )}
                     {analysis && (
                         <div className="space-y-4">
+                            {studentSubmission.file && (
+                                <Alert>
+                                    <FileWarning className="h-4 w-4" />
+                                    <AlertTitle>Analisis Berbasis Teks</AlertTitle>
+                                    <AlertDescription>
+                                        Saat ini analisis file belum diimplementasikan. Analisis berikut hanya didasarkan pada konten teks.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                             <div>
                                 <Label className="text-base">Skor Rekomendasi AI</Label>
                                 <div className="flex items-baseline gap-2">

@@ -95,14 +95,11 @@ export default function AssignmentDetailPage({ params }: { params: { assignmentI
             <Card>
               <CardHeader>
                 <CardTitle>Kumpulkan Jawaban Anda</CardTitle>
+                <CardDescription>Upload file tugas Anda atau ketik jawaban langsung.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="answer-text">Jawaban Teks</Label>
-                  <Textarea id="answer-text" placeholder="Ketik jawaban Anda di sini jika tidak ada file yang diupload." className="min-h-[150px]" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Upload File</Label>
+                  <Label>Upload File (Dianjurkan)</Label>
                   <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
                       <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
                           <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
@@ -111,6 +108,11 @@ export default function AssignmentDetailPage({ params }: { params: { assignmentI
                       </div>
                   </div>
                 </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="answer-text">Atau Jawaban Teks</Label>
+                  <Textarea id="answer-text" placeholder="Ketik jawaban Anda di sini jika tidak ada file yang diupload." className="min-h-[100px]" />
+                </div>
+                
                 <Button className="w-full">
                   <Send className="mr-2 h-4 w-4" /> Kumpulkan Tugas
                 </Button>

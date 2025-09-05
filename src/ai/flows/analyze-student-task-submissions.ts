@@ -15,9 +15,14 @@ const AnalyzeTaskSubmissionInputSchema = z.object({
   taskDescription: z
     .string()
     .describe('The description of the task assigned to the student.'),
-  studentSubmission: z
+  studentSubmissionText: z
     .string()
+    .optional()
     .describe('The text content of the student submission.'),
+  submissionFile: z
+    .string()
+    .optional()
+    .describe("A file submission from a student, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
   gradingCriteria: z
     .string()
     .describe('The grading criteria or rubric for the task.'),
@@ -61,11 +66,16 @@ const analyzeTaskSubmissionPrompt = ai.definePrompt({
   output: {schema: AnalyzeTaskSubmissionOutputSchema},
   prompt: `You are an AI assistant helping lecturers to grade student task submissions.
 
-You will receive the task description, the student submission, and the grading criteria.
+You will receive the task description, the student submission (either as text or a file), and the grading criteria.
 Your goal is to analyze the student submission and provide a pre-grading analysis, highlighting key points and potential issues.
 
 Task Description: {{{taskDescription}}}
-Student Submission: {{{studentSubmission}}}
+{{#if studentSubmissionText}}
+Student Submission (Text): {{{studentSubmissionText}}}
+{{/if}}
+{{#if submissionFile}}
+Student Submission (File): {{media url=submissionFile}}
+{{/if}}
 Grading Criteria: {{{gradingCriteria}}}
 
 Based on your analysis, provide the following:
@@ -88,9 +98,10 @@ const analyzeTaskSubmissionFlow = ai.defineFlow(
     outputSchema: AnalyzeTaskSubmissionOutputSchema,
   },
   async input => {
+    if (!input.studentSubmissionText && !input.submissionFile) {
+        throw new Error("Either studentSubmissionText or submissionFile must be provided.");
+    }
     const {output} = await analyzeTaskSubmissionPrompt(input);
     return output!;
   }
 );
-
-    
