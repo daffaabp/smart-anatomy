@@ -22,6 +22,7 @@ import {
     FileText,
     LogOut,
     Menu,
+    Upload,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +30,7 @@ const navItems = [
     { href: "/dosen-dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/dosen-dashboard/smart-quiz", icon: BookCheck, label: "Smart Quiz" },
     { href: "/dosen-dashboard/assignments", icon: FileText, label: "Tugas" },
+    { href: "/dosen-dashboard/materi", icon: Upload, label: "Materi" },
 ];
 
 export default function DosenDashboardLayout({
@@ -58,7 +60,7 @@ export default function DosenDashboardLayout({
                         <SidebarMenuItem key={item.href}>
                             <Link href={item.href}>
                                 <SidebarMenuButton
-                                    isActive={pathname === item.href}
+                                    isActive={pathname.startsWith(item.href) && (item.href !== "/dosen-dashboard" || pathname === "/dosen-dashboard")}
                                     tooltip={item.label}
                                 >
                                     <item.icon />

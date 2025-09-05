@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Edit, Eye, FileUp, PlusCircle, Trash2, Bot, ChevronRight } from "lucide-react"
+import { Edit, Eye, FileUp, PlusCircle, Trash2, Bot, ChevronRight, UploadCloud } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -31,16 +31,16 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const tasks = [
-  { id: 1, name: "Analisis Kasus Klinis", class: "Kelas A", deadline: "2024-08-15", submissions: 35, total: 50, status: "Published" },
-  { id: 2, name: "Laporan Praktikum Otot", class: "Kelas A", deadline: "2024-08-10", submissions: 48, total: 50, status: "Grading" },
-  { id: 3, name: "Presentasi Sistem Endokrin", class: "Kelas A", deadline: "2024-07-20", submissions: 50, total: 50, status: "Complete" },
-  { id: 4, name: "Rancangan Tugas Akhir", class: "Kelas A", deadline: "2024-09-01", submissions: 0, total: 50, status: "Draft" },
+  { id: "tugas-kasus-klinis", name: "Analisis Kasus Klinis", class: "Kelas A", deadline: "2024-08-15", submissions: 35, total: 50, status: "Published" },
+  { id: "tugas-laporan-otot", name: "Laporan Praktikum Otot", class: "Kelas A", deadline: "2024-08-10", submissions: 48, total: 50, status: "Grading" },
+  { id: "tugas-presentasi-endokrin", name: "Presentasi Sistem Endokrin", class: "Kelas A", deadline: "2024-07-20", submissions: 50, total: 50, status: "Complete" },
+  { id: "tugas-rancangan-akhir", name: "Rancangan Tugas Akhir", class: "Kelas A", deadline: "2024-09-01", submissions: 0, total: 50, status: "Draft" },
 ]
 
 const submissions = [
-    { studentName: "Ahmad Subarjo", studentAvatar: "AS", submissionDate: "2024-08-09", score: null, status: "Perlu Dinilai" },
-    { studentName: "Bunga Citra", studentAvatar: "BC", submissionDate: "2024-08-10", score: null, status: "Perlu Dinilai" },
-    { studentName: "Candra Darusman", studentAvatar: "CD", submissionDate: "2024-08-08", score: 88, status: "Sudah Dinilai" },
+    { id: 'ahmad-subarjo', studentName: "Ahmad Subarjo", studentAvatar: "AS", submissionDate: "2024-08-09", score: null, status: "Perlu Dinilai" },
+    { id: 'bunga-citra', studentName: "Bunga Citra", studentAvatar: "BC", submissionDate: "2024-08-10", score: null, status: "Perlu Dinilai" },
+    { id: 'candra-darusman', studentName: "Candra Darusman", studentAvatar: "CD", submissionDate: "2024-08-08", score: 88, status: "Sudah Dinilai" },
 ]
 
 
@@ -51,7 +51,7 @@ export default function AssignmentsPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Manajemen Tugas</h1>
-        <p className="text-muted-foreground">Buat, distribusikan, dan nilai tugas mahasiswa.</p>
+        <p className="text-muted-foreground">Buat, distribusikan, dan nilai tugas mahasiswa dengan bantuan AI.</p>
       </div>
 
       <Tabs defaultValue="manage" className="w-full">
@@ -62,10 +62,10 @@ export default function AssignmentsPage() {
         </TabsList>
 
         <TabsContent value="manage">
-          <Card>
+          <Card className="mt-4">
             <CardHeader>
               <CardTitle>Daftar Tugas</CardTitle>
-              <CardDescription>Kelola semua tugas untuk Kelas A.</CardDescription>
+              <CardDescription>Kelola semua tugas untuk semua kelas Anda.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -80,7 +80,7 @@ export default function AssignmentsPage() {
                 </TableHeader>
                 <TableBody>
                   {tasks.map((task) => (
-                    <TableRow key={task.name}>
+                    <TableRow key={task.id}>
                       <TableCell className="font-medium">{task.name}</TableCell>
                       <TableCell>{task.deadline}</TableCell>
                       <TableCell>{task.submissions} / {task.total}</TableCell>
@@ -168,12 +168,12 @@ export default function AssignmentsPage() {
         </TabsContent>
 
         <TabsContent value="create">
-            <Card>
+            <Card className="mt-4">
                 <CardHeader>
                 <CardTitle>Buat Tugas Baru</CardTitle>
-                <CardDescription>Isi detail tugas, upload materi, dan gunakan AI untuk membuat rubrik penilaian.</CardDescription>
+                <CardDescription>Isi detail tugas, upload materi, dan gunakan AI untuk membantu membuat rubrik penilaian.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                         <div className="space-y-2">
@@ -188,16 +188,14 @@ export default function AssignmentsPage() {
                             <Label>Materi Pendukung (Opsional)</Label>
                             <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                                    <p className="text-sm text-muted-foreground">Upload file</p>
+                                    <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                    <p className="text-sm text-muted-foreground"><span className="font-semibold">Klik untuk upload</span> atau seret file</p>
                                 </div>
                             </div>
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="task-deadline">Batas Waktu</Label>
-                            <div className="relative">
-                                <Input id="task-deadline" type="date" />
-                            </div>
+                            <Input id="task-deadline" type="date" />
                         </div>
                     </div>
                     <div className="space-y-4">
@@ -210,9 +208,10 @@ export default function AssignmentsPage() {
                         </Button>
                     </div>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline">Simpan sebagai Draft</Button>
                     <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Publikasikan Tugas
+                        <PlusCircle className="mr-2 h-4 w-4" /> Publikasikan Tugas
                     </Button>
                 </div>
                 </CardContent>
@@ -220,7 +219,7 @@ export default function AssignmentsPage() {
         </TabsContent>
         
         <TabsContent value="grade">
-          <Card>
+          <Card className="mt-4">
             <CardHeader>
               <CardTitle>Penilaian Tugas</CardTitle>
               <CardDescription>Pilih tugas untuk memulai penilaian dengan bantuan AI.</CardDescription>
@@ -241,7 +240,7 @@ export default function AssignmentsPage() {
                         <TableHead>Mahasiswa</TableHead>
                         <TableHead>Tanggal Kumpul</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Skor</TableHead>
+                        <TableHead>Skor AI</TableHead>
                         <TableHead>Aksi</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -256,9 +255,9 @@ export default function AssignmentsPage() {
                           <TableCell>
                             <Badge variant={sub.status === "Perlu Dinilai" ? "destructive" : "default"}>{sub.status}</Badge>
                           </TableCell>
-                          <TableCell className="font-medium">{sub.score ?? "-"}</TableCell>
+                          <TableCell className="font-medium">{sub.score ? sub.score-3 : sub.status === "Perlu Dinilai" ? "Menunggu" : "-"}</TableCell>
                           <TableCell>
-                            <Link href={`/dosen-dashboard/assignments/grade/${selectedTask.id}/${sub.studentName.replace(/\s+/g, '-').toLowerCase()}`} passHref>
+                            <Link href={`/dosen-dashboard/assignments/grade/${selectedTask.id}/${sub.id}`} passHref>
                               <Button variant="outline" size="sm">
                                   {sub.status === "Perlu Dinilai" ? "Nilai Sekarang" : "Lihat Penilaian"}
                                   <ChevronRight className="ml-2 h-4 w-4" />

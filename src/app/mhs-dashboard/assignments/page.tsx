@@ -1,36 +1,37 @@
+"use client"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, CheckCircle, Clock, FileText } from "lucide-react"
+import { ArrowRight, CheckCircle, Clock, FileText, Paperclip, UploadCloud } from "lucide-react"
 
 const assignments = [
   { 
+    id: "analisis-kasus",
     title: "Analisis Kasus Klinis", 
     description: "Analisis kasus klinis terkait gangguan sistem saraf.",
     deadline: "15 Agu 2024", 
     status: "Belum Dikerjakan", 
-    statusColor: "bg-red-500"
+    statusVariant: "destructive",
+    actionText: "Kerjakan Tugas"
   },
   { 
+    id: "laporan-otot",
     title: "Laporan Praktikum Otot", 
     description: "Buat laporan lengkap dari hasil praktikum pengamatan struktur otot.",
     deadline: "10 Agu 2024", 
-    status: "Sedang Dikerjakan", 
-    statusColor: "bg-yellow-500"
+    status: "Sudah Dikumpulkan", 
+    statusVariant: "secondary",
+    actionText: "Lihat Pengumpulan"
   },
   { 
+    id: "presentasi-endokrin",
     title: "Presentasi Sistem Endokrin",
     description: "Siapkan materi presentasi mengenai kelenjar endokrin utama.",
     deadline: "20 Jul 2024", 
     status: "Sudah Dinilai", 
-    statusColor: "bg-green-500" 
-  },
-   { 
-    title: "Rancangan Tugas Akhir",
-    description: "Buat proposal singkat untuk rancangan tugas akhir anatomi.",
-    deadline: "1 Sep 2024", 
-    status: "Belum Dikerjakan", 
-    statusColor: "bg-red-500"
+    statusVariant: "default",
+    actionText: "Lihat Hasil"
   },
 ]
 
@@ -43,12 +44,12 @@ export default function StudentAssignmentsPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {assignments.map((task, index) => (
-          <Card key={index} className="flex flex-col">
+        {assignments.map((task) => (
+          <Card key={task.id} className="flex flex-col">
             <CardHeader>
-              <div className="flex justify-between items-center">
-                 <CardTitle className="text-lg">{task.title}</CardTitle>
-                 <Badge variant="secondary" className={`${task.statusColor} text-white`}>{task.status}</Badge>
+              <div className="flex justify-between items-start">
+                 <CardTitle className="text-lg leading-tight">{task.title}</CardTitle>
+                 <Badge variant={task.statusVariant as any}>{task.status}</Badge>
               </div>
               <CardDescription className="flex items-center gap-2 pt-2">
                 <Clock className="w-4 h-4" /> 
@@ -56,16 +57,18 @@ export default function StudentAssignmentsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow">
-              <p className="text-sm text-muted-foreground line-clamp-2">
+              <p className="text-sm text-muted-foreground line-clamp-3">
                 {task.description}
               </p>
             </CardContent>
-            <div className="p-6 pt-0">
-              <Button className="w-full">
-                {task.status === "Sudah Dinilai" ? "Lihat Hasil" : "Kerjakan Tugas"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+            <CardFooter>
+              <Link href={`/mhs-dashboard/assignments/${task.id}`} className="w-full">
+                <Button className="w-full">
+                  {task.actionText}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </CardFooter>
           </Card>
         ))}
       </div>

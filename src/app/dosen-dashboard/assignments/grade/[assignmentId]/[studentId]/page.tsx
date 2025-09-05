@@ -9,6 +9,7 @@ import { Bot, FileText, Loader2, Save, User } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { analyzeTaskSubmission, AnalyzeTaskSubmissionInput } from "@/ai/flows/analyze-student-task-submissions"
+import { useToast } from "@/hooks/use-toast"
 
 type AnalysisResult = {
   aiPreScreeningScore: number;
@@ -21,7 +22,16 @@ type AnalysisResult = {
 export default function GradeSubmissionPage({ params }: { params: { assignmentId: string, studentId: string } }) {
   const [analysis, setAnalysis] = React.useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
-  const studentName = params.studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const { toast } = useToast()
+  
+  const studentName = React.useMemo(() => 
+    params.studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    [params.studentId]
+  );
+
+  const studentSubmissionText = `Pasien datang dengan keluhan sakit kepala hebat dan kaku kuduk. Pemeriksaan fisik menunjukkan tanda Kernig dan Brudzinski positif. Cairan serebrospinal menunjukkan peningkatan sel darah putih dengan dominasi neutrofil, serta kadar glukosa yang rendah dan protein yang tinggi. Kultur cairan serebrospinal kemudian mengkonfirmasi adanya Streptococcus pneumoniae.
+Diagnosis yang paling mungkin adalah meningitis bakterialis yang disebabkan oleh Streptococcus pneumoniae.
+Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceftriaxone 2 gram setiap 12 jam, dikombinasikan dengan Vancomycin. Dexamethasone juga diberikan sebelum atau bersamaan dengan dosis pertama antibiotik untuk mengurangi respons inflamasi dan risiko komplikasi neurologis. Terapi suportif lainnya termasuk manajemen cairan, pemantauan tanda vital, dan pengelolaan tekanan intrakranial jika diperlukan.`
 
   const handleAnalyze = async () => {
     setIsLoading(true);
@@ -29,18 +39,28 @@ export default function GradeSubmissionPage({ params }: { params: { assignmentId
     try {
         const submissionData: AnalyzeTaskSubmissionInput = {
             taskDescription: "Analisis kasus klinis terkait gangguan sistem saraf. Jelaskan patofisiologi, diagnosis, dan penanganan yang relevan berdasarkan materi yang telah diberikan.",
-            studentSubmission: "Pasien datang dengan keluhan sakit kepala hebat dan kaku kuduk. Pemeriksaan fisik menunjukkan tanda Kernig dan Brudzinski positif. Cairan serebrospinal menunjukkan peningkatan sel darah putih. Diagnosis yang paling mungkin adalah meningitis bakterialis. Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceftriaxone, dan terapi suportif lainnya untuk mengelola gejala dan komplikasi.",
+            studentSubmission: studentSubmissionText,
             gradingCriteria: "Ketepatan diagnosis (30%), Kedalaman analisis patofisiologi (30%), Relevansi penanganan (30%), Kejelasan bahasa (10%)"
         }
         const result = await analyzeTaskSubmission(submissionData);
         setAnalysis(result);
     } catch (error) {
         console.error("Failed to analyze submission:", error);
-        // You can show a toast notification here
+        toast({
+            variant: "destructive",
+            title: "Analisis Gagal",
+            description: "Terjadi kesalahan saat AI menganalisis jawaban.",
+        })
     } finally {
         setIsLoading(false);
     }
   }
+  
+  React.useEffect(() => {
+    // Automatically run analysis on page load
+    handleAnalyze();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,7 +79,7 @@ export default function GradeSubmissionPage({ params }: { params: { assignmentId
                 </CardHeader>
                 <CardContent>
                     <p className="text-muted-foreground whitespace-pre-wrap">
-                        Pasien datang dengan keluhan sakit kepala hebat dan kaku kuduk. Pemeriksaan fisik menunjukkan tanda Kernig dan Brudzinski positif. Cairan serebrospinal menunjukkan peningkatan sel darah putih. Diagnosis yang paling mungkin adalah meningitis bakterialis. Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceftriaxone, dan terapi suportif lainnya untuk mengelola gejala dan komplikasi.
+                      {studentSubmissionText}
                     </p>
                 </CardContent>
             </Card>
@@ -69,7 +89,7 @@ export default function GradeSubmissionPage({ params }: { params: { assignmentId
                         <Bot className="w-6 h-6 text-primary"/> Analisis dari AI
                     </CardTitle>
                      <CardDescription>
-                        Gunakan tombol di bawah untuk meminta AI menganalisis jawaban dan memberikan saran penilaian.
+                        AI telah menganalisis jawaban dan memberikan saran penilaian. Tinjau hasilnya di bawah ini.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -81,16 +101,16 @@ export default function GradeSubmissionPage({ params }: { params: { assignmentId
                     )}
                     {!isLoading && !analysis && (
                         <div className="text-center py-10">
-                            <p className="text-muted-foreground mb-4">Analisis AI belum dijalankan.</p>
+                            <p className="text-muted-foreground mb-4">Gagal memuat analisis AI.</p>
                             <Button onClick={handleAnalyze}>
-                                <Bot className="mr-2 h-4 w-4" /> Jalankan Analisis AI
+                                <Bot className="mr-2 h-4 w-4" /> Coba Lagi Analisis AI
                             </Button>
                         </div>
                     )}
                     {analysis && (
                         <div className="space-y-4">
                             <div>
-                                <Label className="text-base">Skor Awal dari AI</Label>
+                                <Label className="text-base">Skor Rekomendasi AI</Label>
                                 <div className="flex items-baseline gap-2">
                                      <p className="text-4xl font-bold text-primary">{analysis.suggestedScore}</p>
                                      <span className="text-muted-foreground">/ 100</span>
@@ -99,11 +119,11 @@ export default function GradeSubmissionPage({ params }: { params: { assignmentId
                             <Separator/>
                             <div>
                                 <Label>Poin Kunci yang Disorot</Label>
-                                <p className="text-sm text-muted-foreground">{analysis.keyPointsHighlighted}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{analysis.keyPointsHighlighted}</p>
                             </div>
                             <div>
-                                <Label>Potensi Masalah/Kekurangan</Label>
-                                <p className="text-sm text-muted-foreground">{analysis.potentialIssuesFlagged}</p>
+                                <Label>Potensi Masalah / Kekurangan</Label>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{analysis.potentialIssuesFlagged}</p>
                             </div>
                              <div>
                                 <Label>Saran Feedback untuk Mahasiswa</Label>
