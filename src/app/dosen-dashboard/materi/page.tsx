@@ -16,9 +16,6 @@ const courseStructure = [
         materials: [
             { type: "video", title: "Video: Pengantar Anatomi" },
             { type: "document", title: "Modul 1: Terminologi Anatomi.pdf" }
-        ],
-        tasks: [
-            { type: "quiz", title: "Quiz Pendahuluan" }
         ]
     },
     {
@@ -28,10 +25,6 @@ const courseStructure = [
             { type: "video", title: "Video: Struktur Sistem Saraf Pusat" },
             { type: "document", title: "Modul 2: Sistem Saraf.pdf" },
             { type: "document", title: "Jurnal: Perkembangan Terbaru Neurosains.pdf" },
-        ],
-        tasks: [
-            { type: "assignment", title: "Tugas: Analisis Kasus Klinis" },
-            { type: "quiz", title: "Quiz Sistem Saraf" }
         ]
     },
     {
@@ -40,9 +33,6 @@ const courseStructure = [
         materials: [
             { type: "video", title: "Video: Fisiologi Kontraksi Otot" },
             { type: "document", title: "Modul 3: Sistem Otot & Rangka.pdf" }
-        ],
-        tasks: [
-             { type: "assignment", title: "Tugas: Laporan Praktikum Otot" }
         ]
     }
 ];
@@ -63,7 +53,7 @@ export default function DosenMateriPage() {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Struktur Mata Kuliah</h1>
-                    <p className="text-muted-foreground">Atur bab, materi, dan tugas untuk kelas Anda di sini.</p>
+                    <p className="text-muted-foreground">Atur bab dan unggah materi pembelajaran untuk kelas Anda di sini.</p>
                 </div>
                 <Dialog>
                     <DialogTrigger asChild>
@@ -102,7 +92,7 @@ export default function DosenMateriPage() {
                                             </div>
                                             <div className="flex-grow">
                                                 <h3 className="text-lg font-semibold text-left">Bab {bab.week}: {bab.title}</h3>
-                                                <p className="text-sm text-muted-foreground text-left">Kelola materi dan tugas untuk bab ini</p>
+                                                <p className="text-sm text-muted-foreground text-left">Kelola materi untuk bab ini</p>
                                             </div>
                                         </div>
                                     </AccordionTrigger>
@@ -146,27 +136,6 @@ export default function DosenMateriPage() {
                                                     </DialogFooter>
                                                 </DialogContent>
                                             </Dialog>
-                                        </div>
-
-                                        {/* Tasks Section */}
-                                        <div className="space-y-3">
-                                            {bab.tasks.map(task => (
-                                                <div key={task.title} className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-muted/50 group">
-                                                    <div className="flex items-center gap-3">
-                                                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                                                        {getIcon(task.type)}
-                                                        <p className="font-medium text-sm">{task.title}</p>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            <Link href="/dosen-dashboard/assignments?tab=create" passHref>
-                                                <Button variant="outline" size="sm" className="w-full border-dashed">
-                                                    <PenSquare className="mr-2 h-4 w-4" /> Tambah Tugas / Kuis
-                                                </Button>
-                                            </Link>
                                         </div>
                                     </div>
                                 </AccordionContent>

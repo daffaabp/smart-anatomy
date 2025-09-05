@@ -1,3 +1,4 @@
+
 "use client"
 import * as React from "react"
 import Link from "next/link"
@@ -21,14 +22,6 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const tasks = [
@@ -44,16 +37,15 @@ const submissions = [
     { id: 'candra-darusman', studentName: "Candra Darusman", studentAvatar: "CD", submissionDate: "2024-08-08", score: 88, status: "Sudah Dinilai" },
 ]
 
-
 export default function AssignmentsPage() {
     const searchParams = useSearchParams();
-    const tab = searchParams.get("tab") || "manage";
-    const [activeTab, setActiveTab] = React.useState(tab);
+    const defaultTab = searchParams.get("tab") || "manage";
+    const [activeTab, setActiveTab] = React.useState(defaultTab);
     const [selectedTask, setSelectedTask] = React.useState<(typeof tasks)[0] | null>(tasks[1]);
 
     React.useEffect(() => {
-        setActiveTab(tab);
-    }, [tab]);
+        setActiveTab(defaultTab);
+    }, [defaultTab]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -281,5 +273,3 @@ export default function AssignmentsPage() {
     </div>
   )
 }
-
-    
