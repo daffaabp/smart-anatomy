@@ -17,7 +17,7 @@ const studentResults = [
   { id: "eka-kurniawan", name: "Eka Kurniawan", avatar: "EK", score: 95 },
 ]
 
-export default function QuizResultsPage({ params }: { params: { quizId: string } }) {
+export default function QuizResultsPage({ params: { quizId } }: { params: { quizId: string } }) {
   const quizName = "Kuis Sistem Saraf"; // Fetch dynamically based on quizId
 
   return (
@@ -93,7 +93,7 @@ export default function QuizResultsPage({ params }: { params: { quizId: string }
                                 <span className={`font-bold text-lg ${student.score >= 80 ? 'text-green-600' : 'text-orange-500'}`}>{student.score}</span>
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/dosen-dashboard/smart-quiz/results/${params.quizId}/${student.id}`}>
+                                <Link href={`/dosen-dashboard/smart-quiz/results/${quizId}/${student.id}`}>
                                     <Button variant="outline" size="sm">
                                         Lihat Analisis Detail <ChevronRight className="w-4 h-4 ml-2" />
                                     </Button>
