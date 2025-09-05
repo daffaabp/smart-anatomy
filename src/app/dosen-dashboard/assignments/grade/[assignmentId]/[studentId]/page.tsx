@@ -20,13 +20,14 @@ type AnalysisResult = {
 };
 
 export default function GradeSubmissionPage({ params }: { params: { assignmentId: string, studentId: string } }) {
+  const { studentId } = params;
   const [analysis, setAnalysis] = React.useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast()
   
   const studentName = React.useMemo(() => 
-    params.studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-    [params.studentId]
+    studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    [studentId]
   );
 
   const studentSubmissionText = `Pasien datang dengan keluhan sakit kepala hebat dan kaku kuduk. Pemeriksaan fisik menunjukkan tanda Kernig dan Brudzinski positif. Cairan serebrospinal menunjukkan peningkatan sel darah putih dengan dominasi neutrofil, serta kadar glukosa yang rendah dan protein yang tinggi. Kultur cairan serebrospinal kemudian mengkonfirmasi adanya Streptococcus pneumoniae.
@@ -160,5 +161,3 @@ Penanganan meliputi pemberian antibiotik intravena secepat mungkin, seperti Ceft
     </div>
   )
 }
-
-    
