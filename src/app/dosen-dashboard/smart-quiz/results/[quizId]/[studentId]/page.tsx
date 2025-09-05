@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 export default function StudentQuizResultPage({ params }: { params: { quizId: string, studentId: string } }) {
+  const { studentId, quizId } = params;
+
   const studentName = React.useMemo(() => 
-    params.studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-    [params.studentId]
+    studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    [studentId]
   );
   const quizName = "Kuis Sistem Saraf"; // Fetch dynamically
 
@@ -28,7 +30,7 @@ export default function StudentQuizResultPage({ params }: { params: { quizId: st
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href={`/dosen-dashboard/smart-quiz/results/${params.quizId}`} className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link href={`/dosen-dashboard/smart-quiz/results/${quizId}`} className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Kembali ke Hasil Kuis
         </Link>
