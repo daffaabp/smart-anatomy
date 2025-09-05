@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 export default function StudentQuizResultPage({ params }: { params: { quizId: string, studentId: string } }) {
-  const studentName = params.studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const studentName = React.useMemo(() => 
+    params.studentId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    [params.studentId]
+  );
   const quizName = "Kuis Sistem Saraf"; // Fetch dynamically
 
   const performanceMetrics = {
