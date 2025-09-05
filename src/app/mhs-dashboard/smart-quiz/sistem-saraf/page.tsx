@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Bot, Check, Loader2, Send, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bot, Check, Clock, Loader2, Send, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -59,11 +59,38 @@ export default function QuizPage() {
     const [chatInput, setChatInput] = React.useState("");
     const [isSendingMessage, setIsSendingMessage] = React.useState(false);
     const [isAwaitingFeedback, setIsAwaitingFeedback] = React.useState(false);
+    const [timeLeft, setTimeLeft] = React.useState(30 * 60); // 30 minutes in seconds
 
 
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
     const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
+
+    React.useEffect(() => {
+        if (showFeedback || isLastQuestion) return;
+
+        const timer = setInterval(() => {
+            setTimeLeft((prevTime) => {
+                if (prevTime <= 1) {
+                    clearInterval(timer);
+                    // Handle time up logic here
+                    alert("Waktu Habis!");
+                    // You might want to auto-submit the quiz here
+                    return 0;
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [showFeedback, isLastQuestion]);
+
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
+
 
     const handleAnswerSubmit = async () => {
         let studentAnswer = currentQuestion.type === "Pilihan Ganda" ? selectedOption : essayAnswer;
@@ -141,7 +168,13 @@ export default function QuizPage() {
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <CardTitle>Quiz: Sistem Saraf</CardTitle>
-                        <CardDescription>Soal {currentQuestionIndex + 1} dari {quizQuestions.length}</CardDescription>
+                        <div className="flex items-center gap-4">
+                             <div className="flex items-center gap-2 text-muted-foreground">
+                                <Clock className="w-5 h-5" />
+                                <span className="font-mono text-lg">{formatTime(timeLeft)}</span>
+                             </div>
+                             <CardDescription>Soal {currentQuestionIndex + 1} dari {quizQuestions.length}</CardDescription>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -272,5 +305,7 @@ export default function QuizPage() {
             )}
         </div>
     );
+
+    
 
     
