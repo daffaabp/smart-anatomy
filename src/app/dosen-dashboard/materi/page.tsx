@@ -71,20 +71,24 @@ export default function DosenMateriPage() {
                      <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
                         {courseStructure.map((bab, index) => (
                             <AccordionItem value={`item-${index+1}`} key={index}>
-                                <AccordionTrigger className="hover:no-underline">
-                                    <div className="flex items-center gap-4 w-full">
-                                        <GripVertical className="h-5 w-5 text-muted-foreground" />
-                                        <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground font-bold text-lg shrink-0">
-                                            {bab.week}
+                                <div className="flex items-center w-full">
+                                    <AccordionTrigger className="hover:no-underline flex-grow">
+                                        <div className="flex items-center gap-4 w-full">
+                                            <GripVertical className="h-5 w-5 text-muted-foreground" />
+                                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground font-bold text-lg shrink-0">
+                                                {bab.week}
+                                            </div>
+                                            <div className="flex-grow">
+                                                <h3 className="text-lg font-semibold text-left">Bab {bab.week}: {bab.title}</h3>
+                                                <p className="text-sm text-muted-foreground text-left">Kelola materi dan tugas untuk bab ini</p>
+                                            </div>
                                         </div>
-                                        <div className="flex-grow">
-                                            <h3 className="text-lg font-semibold text-left">Bab {bab.week}: {bab.title}</h3>
-                                            <p className="text-sm text-muted-foreground text-left">Kelola materi dan tugas untuk bab ini</p>
-                                        </div>
+                                    </AccordionTrigger>
+                                    <div className="flex items-center gap-2 pr-4">
                                         <Button variant="ghost" size="icon"><PenSquare className="h-4 w-4"/></Button>
                                         <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive"/></Button>
                                     </div>
-                                </AccordionTrigger>
+                                </div>
                                 <AccordionContent>
                                     <div className="pl-16 space-y-6 py-4 border-l-2 border-dashed ml-6">
                                         
