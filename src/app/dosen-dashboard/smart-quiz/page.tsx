@@ -1,3 +1,4 @@
+
 "use client"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
@@ -5,10 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Bot, Copy, FileUp, PlusCircle, Trash2, Pencil, Eye, Send, Loader2 } from "lucide-react"
+import { Bot, FileUp, PlusCircle, Trash2, Pencil, Eye, Send, Loader2, Settings, Copy, Clock, Users } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Dialog,
@@ -20,30 +19,15 @@ import {
   DialogTrigger,
   DialogClose
 } from "@/components/ui/dialog"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { aiChat, AIChatInput } from "@/ai/flows/ai-chat-interface"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const activeCodes = [
-  { name: "Quiz Sistem Saraf", code: "ANF-QUIZ-2401", expires: "2024-07-30 23:59", usage: 45, total: 50, status: "Active" },
-  { name: "Quiz Otot dan Rangka", code: "ANF-QUIZ-2402", expires: "2024-07-25 23:59", usage: 50, total: 50, status: "Active" },
-  { name: "Quiz Pendahuluan", code: "ANF-QUIZ-2312", expires: "2024-06-01 23:59", usage: 50, total: 50, status: "Expired" },
-]
-
-const generatedQuestions = [
+const initialGeneratedQuestions = [
     { type: "Pilihan Ganda", question: "Bagian otak mana yang bertanggung jawab untuk mengatur keseimbangan dan koordinasi motorik?", options: ["Cerebrum", "Cerebellum", "Medulla Oblongata", "Pons"], answer: "Cerebellum" },
-    { type: "Essay", question: "Jelaskan proses transmisi sinyal saraf melalui sinapsis kimiawi." },
-    { type: "Benar/Salah", question: "Saraf otonom simpatis memicu respons 'fight or flight'." },
-    { type: "Pilihan Ganda", question: "Neuron sensorik membawa informasi dari... ke...", options: ["PNS ke CNS", "CNS ke PNS", "Otot ke Kelenjar", "CNS ke Otot"], answer: "PNS ke CNS"},
-    { type: "Essay", question: "Deskripsikan perbedaan utama antara sistem saraf simpatis dan parasimpatis." }
+    { type: "Essay", question: "Jelaskan proses transmisi sinyal saraf melalui sinapsis kimiawi." , answer: "Prosesnya melibatkan pelepasan neurotransmitter dari terminal akson..."},
+    { type: "Benar/Salah", question: "Saraf otonom simpatis memicu respons 'fight or flight'.", answer: "Benar" },
 ]
 
 type ChatMessage = {
@@ -51,23 +35,25 @@ type ChatMessage = {
     content: string;
 };
 
+type Question = {
+    type: string;
+    question: string;
+    options?: string[];
+    answer?: string;
+}
+
 export default function SmartQuizPage() {
     const [isGenerating, setIsGenerating] = React.useState(false);
     const [quizGenerated, setQuizGenerated] = React.useState(false);
+    const [generatedQuestions, setGeneratedQuestions] = React.useState<Question[]>([]);
     
     const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([
-        { role: "ai", content: 'Halo! Ada yang bisa saya bantu? Anda bisa meminta saya membuat soal, misalnya: "Buat 10 soal pilihan ganda tentang sistem saraf"' }
+        { role: "ai", content: 'Halo! Silakan upload materi atau ketik perintah di bawah ini untuk memulai. Contoh: "Buat 10 soal pilihan ganda tentang sistem saraf dari materi yang saya unggah"' }
     ]);
     const [chatInput, setChatInput] = React.useState("");
     const [isSendingMessage, setIsSendingMessage] = React.useState(false);
+    const [generatedCode, setGeneratedCode] = React.useState("");
 
-    const handleGenerateQuiz = () => {
-        setIsGenerating(true);
-        setTimeout(() => {
-            setIsGenerating(false);
-            setQuizGenerated(true);
-        }, 2000);
-    }
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,221 +64,190 @@ export default function SmartQuizPage() {
         setChatInput("");
         setIsSendingMessage(true);
 
-        try {
-            const aiResult = await aiChat({ message: chatInput });
-            const newAiMessage: ChatMessage = { role: "ai", content: aiResult.response };
-            setChatMessages(prev => [...prev, newAiMessage]);
-        } catch (error) {
-            const errorMessage: ChatMessage = { role: "ai", content: "Maaf, terjadi kesalahan saat menghubungi AI." };
-            setChatMessages(prev => [...prev, errorMessage]);
-            console.error(error);
-        } finally {
+        // Simulate AI generating questions based on prompt
+        setTimeout(() => {
+            const aiResponse: ChatMessage = { role: "ai", content: "Tentu, saya telah membuat 3 soal berdasarkan permintaan Anda. Silakan tinjau di panel 'Pratinjau Kuis'." };
+            setChatMessages(prev => [...prev, aiResponse]);
+            setGeneratedQuestions(initialGeneratedQuestions);
+            setQuizGenerated(true);
             setIsSendingMessage(false);
-        }
+        }, 2000);
     };
 
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Smart Quiz</h1>
-        <p className="text-muted-foreground">Buat, kelola, dan analisis quiz dengan bantuan AI.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Smart Quiz Generator</h1>
+        <p className="text-muted-foreground">Buat quiz secara interaktif dengan bantuan AI.</p>
       </div>
-      <Tabs defaultValue="create" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="create">Buat Quiz</TabsTrigger>
-          <TabsTrigger value="manage">Manajemen Kode</TabsTrigger>
-          <TabsTrigger value="ai-chat">AI Assistant</TabsTrigger>
-        </TabsList>
-        <TabsContent value="create">
-          <Card>
-            <CardHeader>
-              <CardTitle>Buat Quiz dengan AI</CardTitle>
-              <CardDescription>Upload materi, tulis konten, atau gunakan AI assistant untuk membuat quiz secara otomatis.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <FileUp className="w-10 h-10 mb-3 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Klik untuk upload</span> atau seret file</p>
-                  <p className="text-xs text-muted-foreground">PDF, PPT, Word, Gambar, atau Link URL</p>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
+        {/* Left Column */}
+        <div className="lg:col-span-3 flex flex-col gap-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Materi</CardTitle>
+                    <CardDescription>Upload materi (PDF, Word, Teks) sebagai dasar pembuatan kuis.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground"><span className="font-semibold">Klik untuk upload</span> atau seret file</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="flex-1 flex flex-col">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Bot /> Chat AI</CardTitle>
+                    <CardDescription>Berikan perintah kepada AI untuk men-generate soal kuis.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 overflow-y-auto p-4">
+                    <ScrollArea className="h-full pr-4">
+                        <div className="space-y-4">
+                            {chatMessages.map((msg, index) => (
+                                <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' && 'justify-end')}>
+                                    {msg.role === 'ai' && (
+                                        <Avatar className="w-8 h-8 border bg-primary text-primary-foreground"><AvatarFallback>AI</AvatarFallback></Avatar>
+                                    )}
+                                    <div className={cn("p-3 rounded-lg max-w-[85%]", msg.role === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
+                                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                    </div>
+                                    {msg.role === 'user' && (
+                                        <Avatar className="w-8 h-8 border"><AvatarFallback>DS</AvatarFallback></Avatar>
+                                    )}
+                                </div>
+                            ))}
+                            {isSendingMessage && (
+                                <div className="flex items-start gap-3">
+                                    <Avatar className="w-8 h-8 border bg-primary text-primary-foreground"><AvatarFallback>AI</AvatarFallback></Avatar>
+                                    <div className="bg-muted p-3 rounded-lg flex items-center"><Loader2 className="w-5 h-5 animate-spin"/></div>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </CardContent>
+                <div className="p-4 border-t bg-background">
+                    <form onSubmit={handleSendMessage} className="relative">
+                        <Textarea
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            placeholder="Ketik perintah Anda..."
+                            className="pr-16 min-h-[50px]"
+                            disabled={isSendingMessage}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendMessage(e);
+                                }
+                            }}
+                        />
+                        <Button type="submit" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-12" disabled={isSendingMessage}>
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </form>
                 </div>
-              </div>
-              <div>
-                <Label htmlFor="quiz-title">Atau buat manual dari teks</Label>
-                <Textarea placeholder="Tulis atau paste konten materi disini... AI akan membuat soal dari sini." className="mt-2 min-h-[150px]" />
-              </div>
-              <div className="flex justify-end">
-                <Dialog open={quizGenerated} onOpenChange={setQuizGenerated}>
-                    <Button onClick={handleGenerateQuiz} disabled={isGenerating}>
-                        {isGenerating ? (
-                            <>
-                                <Bot className="mr-2 h-4 w-4 animate-spin" />
-                                Memproses...
-                            </>
+            </Card>
+        </div>
+
+        {/* Right Column */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+            <Card className="flex-1 flex flex-col">
+                <CardHeader>
+                    <CardTitle>Pratinjau Kuis</CardTitle>
+                    <CardDescription>Tinjau dan edit soal yang dibuat oleh AI.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 overflow-y-auto">
+                    <ScrollArea className="h-[40vh] pr-4">
+                        {!quizGenerated ? (
+                             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                                <Bot className="w-12 h-12 mb-4"/>
+                                <p>Kuis akan ditampilkan di sini setelah Anda memberikan perintah pada AI.</p>
+                            </div>
                         ) : (
-                            <>
-                                <PlusCircle className="mr-2 h-4 w-4" /> Generate Quiz
-                            </>
-                        )}
-                    </Button>
-                    <DialogContent className="max-w-4xl">
-                        <DialogHeader>
-                        <DialogTitle>Hasil Quiz Dibuat AI</DialogTitle>
-                        <DialogDescription>Berikut adalah soal-soal yang berhasil dibuat berdasarkan materi Anda. Anda bisa mengedit atau langsung mempublikasikannya.</DialogDescription>
-                        </DialogHeader>
-                        <ScrollArea className="max-h-[60vh] p-4 border rounded-md">
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                                 {generatedQuestions.map((q, index) => (
-                                    <div key={index} className="p-4 border rounded-lg">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <p className="font-semibold">{index + 1}. ({q.type}) {q.question}</p>
-                                                {q.options && (
-                                                    <div className="mt-2 space-y-1 text-sm">
-                                                        {q.options.map((opt, i) => (
-                                                            <p key={i} className={cn("ml-4", q.answer === opt && "text-green-600 font-bold")}>{String.fromCharCode(97 + i)}. {opt}</p>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {q.type === 'Essay' && q.answer && (
-                                                     <p className="mt-2 text-sm text-blue-600"><b>Contoh Jawaban:</b> {q.answer}</p>
-                                                )}
+                                     <div key={index} className="p-4 border rounded-lg relative group/q">
+                                        <p className="font-semibold pr-8">{index + 1}. {q.question}</p>
+                                        <Badge variant="outline" className="my-2">{q.type}</Badge>
+                                        {q.options && (
+                                            <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                                                {q.options.map((opt, i) => (
+                                                    <p key={i} className={cn("ml-4", q.answer === opt && "text-green-600 font-bold")}>
+                                                        {String.fromCharCode(97 + i)}. {opt}
+                                                    </p>
+                                                ))}
                                             </div>
-                                            <Button variant="ghost" size="icon" className="shrink-0">
-                                                <Pencil className="w-4 h-4"/>
-                                            </Button>
-                                        </div>
+                                        )}
+                                         {q.type !== 'Pilihan Ganda' && q.answer && (
+                                             <p className="mt-2 text-sm text-blue-600"><b>Jawaban:</b> {q.answer}</p>
+                                        )}
+                                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 opacity-0 group-hover/q:opacity-100">
+                                            <Pencil className="w-4 h-4"/>
+                                        </Button>
                                     </div>
                                 ))}
                             </div>
-                        </ScrollArea>
-                        <DialogFooter>
-                        <Button variant="outline" onClick={() => setQuizGenerated(false)}>Edit Lagi</Button>
-                        <Button>
-                            <Send className="mr-2 h-4 w-4" /> Publikasikan & Buat Kode
-                        </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="manage">
-          <Card>
-            <CardHeader>
-              <CardTitle>Manajemen Kode Quiz</CardTitle>
-              <CardDescription>Lihat dan kelola kode quiz yang aktif, kedaluwarsa, atau dicabut.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nama Quiz</TableHead>
-                    <TableHead>Kode</TableHead>
-                    <TableHead>Berakhir</TableHead>
-                    <TableHead>Penggunaan</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {activeCodes.map((item) => (
-                    <TableRow key={item.code}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell>{item.code}</TableCell>
-                      <TableCell>{item.expires}</TableCell>
-                      <TableCell>{item.usage} / {item.total}</TableCell>
-                      <TableCell>
-                        <Badge variant={item.status === 'Active' ? 'default' : 'destructive'} className={item.status === 'Active' ? 'bg-green-500' : ''}>
-                          {item.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="flex gap-2">
-                        <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Apakah Anda yakin?</DialogTitle>
-                                    <DialogDescription>
-                                        Tindakan ini akan mencabut kode quiz '{item.code}' dan tidak dapat diurungkan. Mahasiswa tidak akan bisa lagi menggunakan kode ini.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button variant="outline">Batal</Button>
-                                    </DialogClose>
-                                    <Button variant="destructive">Ya, Cabut Kode</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="ai-chat">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader>
-              <CardTitle>AI Assistant Chat</CardTitle>
-              <CardDescription>Gunakan AI untuk membuat soal, rubrik, atau contoh jawaban.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto p-4">
-                 <ScrollArea className="h-full pr-4">
-                    <div className="space-y-4">
-                        {chatMessages.map((msg, index) => (
-                            <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' && 'justify-end')}>
-                                {msg.role === 'ai' && (
-                                    <Avatar className="w-8 h-8 border">
-                                        <AvatarFallback>AI</AvatarFallback>
-                                    </Avatar>
-                                )}
-                                <div className={cn("p-3 rounded-lg max-w-[80%]", msg.role === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
-                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                </div>
-                                {msg.role === 'user' && (
-                                     <Avatar className="w-8 h-8 border">
-                                        <AvatarFallback>DS</AvatarFallback>
-                                    </Avatar>
-                                )}
-                            </div>
-                        ))}
-                        {isSendingMessage && (
-                            <div className="flex items-start gap-3">
-                                <Avatar className="w-8 h-8 border">
-                                    <AvatarFallback>AI</AvatarFallback>
-                                </Avatar>
-                                <div className="bg-muted p-3 rounded-lg max-w-[80%] flex items-center">
-                                    <Loader2 className="w-5 h-5 animate-spin"/>
-                                </div>
-                            </div>
                         )}
+                    </ScrollArea>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Pengaturan & Publikasi</CardTitle>
+                    <CardDescription>Atur detail kuis sebelum dipublikasikan.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="quiz-timer" className="flex items-center gap-2"><Clock className="w-4 h-4"/> Waktu Pengerjaan (menit)</Label>
+                        <Input id="quiz-timer" type="number" placeholder="cth. 60" disabled={!quizGenerated} />
                     </div>
-                </ScrollArea>
-            </CardContent>
-            <div className="p-4 border-t">
-                <form onSubmit={handleSendMessage} className="relative">
-                    <Input
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        placeholder="Ketik perintah Anda, cth: 'Buat 5 soal essay tentang sistem peredaran darah'"
-                        className="pr-12"
-                        disabled={isSendingMessage}
-                    />
-                    <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" disabled={isSendingMessage}>
-                        <Send className="h-4 w-4" />
-                    </Button>
-                </form>
-            </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                     <div className="space-y-2">
+                        <Label htmlFor="quiz-class" className="flex items-center gap-2"><Users className="w-4 h-4"/> Tujukan untuk Kelas</Label>
+                        <Select disabled={!quizGenerated}>
+                            <SelectTrigger id="quiz-class">
+                                <SelectValue placeholder="Pilih kelas" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="kelas-a">Kelas A - Anatomi & Fisiologi</SelectItem>
+                                <SelectItem value="kelas-b">Kelas B - Anatomi & Fisiologi</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className="w-full" disabled={!quizGenerated}>
+                                <Send className="mr-2 h-4 w-4" /> Publikasikan & Buat Kode
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Kuis Berhasil Dipublikasikan!</DialogTitle>
+                                <DialogDescription>Bagikan kode berikut kepada mahasiswa agar mereka dapat mengakses kuis ini.</DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                                <Label htmlFor="quiz-code">Kode Kuis</Label>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <Input id="quiz-code" value="ANF-QUIZ-2403" readOnly className="text-lg font-mono tracking-widest text-center" />
+                                    <Button size="icon" onClick={() => navigator.clipboard.writeText('ANF-QUIZ-2403')}>
+                                        <Copy className="h-4 w-4"/>
+                                    </Button>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button>Selesai</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </CardContent>
+            </Card>
+        </div>
+      </div>
     </div>
   )
 }
+
+    
