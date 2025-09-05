@@ -65,25 +65,31 @@ export default function QuizPage() {
     const currentQuestion = quizQuestions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
     const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
+    const isQuizFinished = isLastQuestion && showFeedback;
 
     React.useEffect(() => {
-        if (showFeedback || isLastQuestion) return;
+        // Timer only runs when the user is answering a question (showFeedback is false)
+        // and the quiz is not finished yet.
+        if (showFeedback || isQuizFinished) {
+            return;
+        }
 
         const timer = setInterval(() => {
             setTimeLeft((prevTime) => {
                 if (prevTime <= 1) {
                     clearInterval(timer);
-                    // Handle time up logic here
                     alert("Waktu Habis!");
-                    // You might want to auto-submit the quiz here
+                    // Handle time up logic here, e.g., auto-submit
                     return 0;
                 }
                 return prevTime - 1;
             });
         }, 1000);
 
+        // Cleanup function to clear the interval when the component unmounts
+        // or when the dependencies (showFeedback, isQuizFinished) change.
         return () => clearInterval(timer);
-    }, [showFeedback, isLastQuestion]);
+    }, [showFeedback, isQuizFinished]);
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -305,7 +311,6 @@ export default function QuizPage() {
             )}
         </div>
     );
-
-    
+}
 
     
