@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Bot, Copy, FileUp, PlusCircle, Trash2, Pencil, Eye, Send } from "lucide-react"
+import { Bot, Copy, FileUp, PlusCircle, Trash2, Pencil, Eye, Send, Loader2 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Dialog,
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { aiChat, AIChatInput } from "@/ai/flows/ai-chat-interface"
 
 const activeCodes = [
   { name: "Quiz Sistem Saraf", code: "ANF-QUIZ-2401", expires: "2024-07-30 23:59", usage: 45, total: 50, status: "Active" },
@@ -45,10 +46,21 @@ const generatedQuestions = [
     { type: "Essay", question: "Deskripsikan perbedaan utama antara sistem saraf simpatis dan parasimpatis." }
 ]
 
+type ChatMessage = {
+    role: "user" | "ai";
+    content: string;
+};
+
 export default function SmartQuizPage() {
     const [isGenerating, setIsGenerating] = React.useState(false);
     const [quizGenerated, setQuizGenerated] = React.useState(false);
     
+    const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([
+        { role: "ai", content: 'Halo! Ada yang bisa saya bantu? Anda bisa meminta saya membuat soal, misalnya: "Buat 10 soal pilihan ganda tentang sistem saraf"' }
+    ]);
+    const [chatInput, setChatInput] = React.useState("");
+    const [isSendingMessage, setIsSendingMessage] = React.useState(false);
+
     const handleGenerateQuiz = () => {
         setIsGenerating(true);
         setTimeout(() => {
@@ -56,6 +68,29 @@ export default function SmartQuizPage() {
             setQuizGenerated(true);
         }, 2000);
     }
+
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!chatInput.trim()) return;
+
+        const newUserMessage: ChatMessage = { role: "user", content: chatInput };
+        setChatMessages(prev => [...prev, newUserMessage]);
+        setChatInput("");
+        setIsSendingMessage(true);
+
+        try {
+            const aiResult = await aiChat({ message: chatInput });
+            const newAiMessage: ChatMessage = { role: "ai", content: aiResult.response };
+            setChatMessages(prev => [...prev, newAiMessage]);
+        } catch (error) {
+            const errorMessage: ChatMessage = { role: "ai", content: "Maaf, terjadi kesalahan saat menghubungi AI." };
+            setChatMessages(prev => [...prev, errorMessage]);
+            console.error(error);
+        } finally {
+            setIsSendingMessage(false);
+        }
+    };
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -118,6 +153,9 @@ export default function SmartQuizPage() {
                                                             <p key={i} className={cn("ml-4", q.answer === opt && "text-green-600 font-bold")}>{String.fromCharCode(97 + i)}. {opt}</p>
                                                         ))}
                                                     </div>
+                                                )}
+                                                {q.type === 'Essay' && q.answer && (
+                                                     <p className="mt-2 text-sm text-blue-600"><b>Contoh Jawaban:</b> {q.answer}</p>
                                                 )}
                                             </div>
                                             <Button variant="ghost" size="icon" className="shrink-0">
@@ -205,31 +243,52 @@ export default function SmartQuizPage() {
               <CardTitle>AI Assistant Chat</CardTitle>
               <CardDescription>Gunakan AI untuk membuat soal, rubrik, atau contoh jawaban.</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col gap-4 overflow-y-auto p-4">
-                <div className="flex items-start gap-3">
-                    <Avatar className="w-8 h-8 border">
-                        <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
-                    <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                        <p className="text-sm">Halo! Ada yang bisa saya bantu? Anda bisa meminta saya membuat soal, misalnya: "Buat 10 soal pilihan ganda tentang sistem saraf"</p>
+            <CardContent className="flex-1 overflow-y-auto p-4">
+                 <ScrollArea className="h-full pr-4">
+                    <div className="space-y-4">
+                        {chatMessages.map((msg, index) => (
+                            <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' && 'justify-end')}>
+                                {msg.role === 'ai' && (
+                                    <Avatar className="w-8 h-8 border">
+                                        <AvatarFallback>AI</AvatarFallback>
+                                    </Avatar>
+                                )}
+                                <div className={cn("p-3 rounded-lg max-w-[80%]", msg.role === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
+                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                </div>
+                                {msg.role === 'user' && (
+                                     <Avatar className="w-8 h-8 border">
+                                        <AvatarFallback>DS</AvatarFallback>
+                                    </Avatar>
+                                )}
+                            </div>
+                        ))}
+                        {isSendingMessage && (
+                            <div className="flex items-start gap-3">
+                                <Avatar className="w-8 h-8 border">
+                                    <AvatarFallback>AI</AvatarFallback>
+                                </Avatar>
+                                <div className="bg-muted p-3 rounded-lg max-w-[80%] flex items-center">
+                                    <Loader2 className="w-5 h-5 animate-spin"/>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
-                <div className="flex items-start gap-3 justify-end">
-                    <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                        <p className="text-sm">Buat 5 soal essay tentang sistem peredaran darah.</p>
-                    </div>
-                    <Avatar className="w-8 h-8 border">
-                        <AvatarFallback>DS</AvatarFallback>
-                    </Avatar>
-                </div>
+                </ScrollArea>
             </CardContent>
             <div className="p-4 border-t">
-              <div className="relative">
-                <Input placeholder="Ketik pesan Anda..." className="pr-12" />
-                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-                  <Bot className="h-4 w-4" />
-                </Button>
-              </div>
+                <form onSubmit={handleSendMessage} className="relative">
+                    <Input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        placeholder="Ketik perintah Anda, cth: 'Buat 5 soal essay tentang sistem peredaran darah'"
+                        className="pr-12"
+                        disabled={isSendingMessage}
+                    />
+                    <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" disabled={isSendingMessage}>
+                        <Send className="h-4 w-4" />
+                    </Button>
+                </form>
             </div>
           </Card>
         </TabsContent>

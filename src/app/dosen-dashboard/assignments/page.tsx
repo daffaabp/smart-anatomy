@@ -1,5 +1,6 @@
 "use client"
 import * as React from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -211,8 +212,13 @@ export default function AssignmentsPage() {
             <CardContent>
               {selectedTask ? (
                 <div>
-                  <h3 className="text-lg font-semibold mb-1">Menilai: {selectedTask.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Total Pengumpulan: {selectedTask.submissions}/{selectedTask.total}</p>
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Menilai: {selectedTask.name}</h3>
+                      <p className="text-sm text-muted-foreground">Total Pengumpulan: {selectedTask.submissions}/{selectedTask.total}</p>
+                    </div>
+                    <Button variant="outline" onClick={() => setSelectedTask(null)}>Pilih Tugas Lain</Button>
+                  </div>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -236,9 +242,12 @@ export default function AssignmentsPage() {
                           </TableCell>
                           <TableCell className="font-medium">{sub.score ?? "-"}</TableCell>
                           <TableCell>
-                            <Button variant="outline" size="sm">
-                                Nilai Sekarang <ChevronRight className="ml-2 h-4 w-4" />
-                            </Button>
+                            <Link href={`/dosen-dashboard/assignments/grade/${selectedTask.id}/${sub.studentName.replace(/\s+/g, '-').toLowerCase()}`} passHref>
+                              <Button variant="outline" size="sm">
+                                  {sub.status === "Perlu Dinilai" ? "Nilai Sekarang" : "Lihat Penilaian"}
+                                  <ChevronRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </Link>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -248,10 +257,11 @@ export default function AssignmentsPage() {
               ) : (
                 <div className="text-center text-muted-foreground py-12">
                   <p className="mb-4">Pilih tugas dari daftar untuk melihat pengumpulan mahasiswa.</p>
-                  <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                    {tasks.filter(t => t.status === 'Grading' || t.status === 'Complete').map(task => (
-                      <Button key={task.id} variant="outline" onClick={() => setSelectedTask(task)}>
-                        {task.name}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    {tasks.filter(t => t.status === 'Grading' || t.status === 'Published' || t.status === 'Complete').map(task => (
+                      <Button key={task.id} variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => setSelectedTask(task)}>
+                        <span className="font-semibold">{task.name}</span>
+                        <span className="text-xs text-muted-foreground">{task.submissions}/{task.total} terkumpul</span>
                       </Button>
                     ))}
                   </div>
