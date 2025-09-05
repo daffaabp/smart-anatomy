@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { getQuizFeedback, GetQuizFeedbackInput } from "@/ai/flows/get-quiz-feedback";
+import { Input } from "@/components/ui/input";
 
 const quizQuestions = [
     {
@@ -271,6 +272,5 @@ export default function QuizPage() {
             )}
         </div>
     );
-}
 
     
