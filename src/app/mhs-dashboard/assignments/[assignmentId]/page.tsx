@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Clock, Download, FileText, Paperclip, Send, UploadCloud } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
 
 export default function AssignmentDetailPage({ params }: { params: { assignmentId: string } }) {
   // Mock data, in a real app, fetch based on params.assignmentId
