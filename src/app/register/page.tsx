@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { GraduationCap } from "lucide-react"
 
 export default function RegisterPage() {
@@ -21,41 +20,29 @@ export default function RegisterPage() {
           <div className="flex justify-center items-center mb-4">
             <GraduationCap className="h-10 w-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Buat Akun Baru</CardTitle>
+          <CardTitle className="text-2xl">Buat Akun Mahasiswa</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk mendaftar di Smart Anatomy
+            Isi form di bawah untuk mendaftar di Smart Anatomy.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="full-name">Nama Lengkap</Label>
-              <Input id="full-name" placeholder="John Doe" required />
+              <Input id="full-name" placeholder="Nama Lengkap Anda" required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="email@domain.com"
                 required
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="role">Saya adalah seorang</Label>
-              <Select>
-                <SelectTrigger id="role">
-                  <SelectValue placeholder="Pilih peran Anda" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="dosen">Dosen</SelectItem>
-                  <SelectItem value="mahasiswa">Mahasiswa</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input id="password" type="password" required />
             </div>
             <Button type="submit" className="w-full">
               Buat Akun

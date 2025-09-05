@@ -13,6 +13,16 @@ import { Label } from "@/components/ui/label"
 import { GraduationCap } from "lucide-react"
 
 export default function LoginPage() {
+  // In a real app, you'd have a state for role selection
+  // or determine the role after successful login.
+  // For this prototype, we'll keep it simple.
+  const handleLogin = () => {
+    // Here you would add your authentication logic.
+    // Based on the user's role, you would redirect them.
+    // e.g., if (user.role === 'dosen') router.push('/dosen-dashboard')
+    // else router.push('/mhs-dashboard')
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="mx-auto max-w-sm w-full">
@@ -22,7 +32,7 @@ export default function LoginPage() {
             </div>
           <CardTitle className="text-2xl">Login ke Smart Anatomy</CardTitle>
           <CardDescription>
-            Masukkan email dan password Anda untuk mengakses dasbor
+            Masukkan email dan password untuk mengakses dasbor Anda.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -34,6 +44,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                defaultValue="dosen@example.com"
               />
             </div>
             <div className="grid gap-2">
@@ -46,18 +57,24 @@ export default function LoginPage() {
                   Lupa password?
                 </Link>
               </div>
-              <Input id="password" type="password" required />
+              <Input id="password" type="password" required defaultValue="password" />
             </div>
-            <Link href="/dosen-dashboard" className="w-full">
+            {/* The Link will be replaced by the form's submit action */}
+            <Link href="/dosen-dashboard" passHref>
               <Button type="submit" className="w-full">
-                Login
+                Login sebagai Dosen
+              </Button>
+            </Link>
+             <Link href="/mhs-dashboard" passHref>
+              <Button type="submit" className="w-full" variant="secondary">
+                Login sebagai Mahasiswa
               </Button>
             </Link>
           </div>
           <div className="mt-4 text-center text-sm">
             Belum punya akun?{" "}
             <Link href="/register" className="underline">
-              Register
+              Register sebagai Mahasiswa
             </Link>
           </div>
         </CardContent>
