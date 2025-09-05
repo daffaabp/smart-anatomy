@@ -58,7 +58,7 @@ export default function MahasiswaDashboardLayout({
                         <SidebarMenuItem key={item.href}>
                             <Link href={item.href}>
                                 <SidebarMenuButton
-                                    isActive={pathname === item.href}
+                                    isActive={pathname.startsWith(item.href) && (item.href !== "/mhs-dashboard" || pathname === "/mhs-dashboard")}
                                     tooltip={item.label}
                                 >
                                     <item.icon />
