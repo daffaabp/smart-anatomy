@@ -97,9 +97,25 @@ export default function AssignmentsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="flex gap-2">
-                        <SheetTrigger asChild>
-                            <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
-                        </SheetTrigger>
+                        <Sheet>
+                          <SheetTrigger asChild>
+                              <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
+                          </SheetTrigger>
+                          <SheetContent className="w-[400px] sm:w-[540px]">
+                            <SheetHeader>
+                            <SheetTitle>Detail Tugas: {task.name}</SheetTitle>
+                            <SheetDescription>
+                                Informasi lengkap mengenai tugas, termasuk deskripsi, materi, dan daftar mahasiswa yang sudah & belum mengumpulkan.
+                            </SheetDescription>
+                            </SheetHeader>
+                            <div className="py-4 space-y-4">
+                                <p className="text-sm text-muted-foreground">
+                                    <strong>Deskripsi:</strong> Analisis kasus klinis terkait gangguan sistem saraf. Jelaskan patofisiologi, diagnosis, dan penanganan yang relevan berdasarkan materi yang telah diberikan.
+                                </p>
+                                <p className="text-sm text-muted-foreground"><strong>Batas Waktu:</strong> {task.deadline}</p>
+                            </div>
+                          </SheetContent>
+                        </Sheet>
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant="outline" size="icon"><Edit className="h-4 w-4" /></Button>
@@ -271,22 +287,6 @@ export default function AssignmentsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-      <Sheet>
-        <SheetContent className="w-[400px] sm:w-[540px]">
-            <SheetHeader>
-            <SheetTitle>Detail Tugas: Analisis Kasus Klinis</SheetTitle>
-            <SheetDescription>
-                Informasi lengkap mengenai tugas, termasuk deskripsi, materi, dan daftar mahasiswa yang sudah & belum mengumpulkan.
-            </SheetDescription>
-            </SheetHeader>
-            <div className="py-4 space-y-4">
-                <p className="text-sm text-muted-foreground">
-                    <strong>Deskripsi:</strong> Analisis kasus klinis terkait gangguan sistem saraf. Jelaskan patofisiologi, diagnosis, dan penanganan yang relevan berdasarkan materi yang telah diberikan.
-                </p>
-                <p className="text-sm text-muted-foreground"><strong>Batas Waktu:</strong> 2024-08-15</p>
-            </div>
-        </SheetContent>
-    </Sheet>
     </div>
   )
 }
