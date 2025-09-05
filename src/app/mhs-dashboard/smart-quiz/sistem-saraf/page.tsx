@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Bot, Check, Clock, Loader2, Send, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bot, Check, Clock, Loader2, Send, X, Lock } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -53,6 +53,7 @@ export default function QuizPage() {
     const [answers, setAnswers] = React.useState<Answer[]>([]);
     const [selectedOption, setSelectedOption] = React.useState<string>("");
     const [essayAnswer, setEssayAnswer] = React.useState<string>("");
+    const [isAnswerLocked, setIsAnswerLocked] = React.useState(false);
     const [showFeedback, setShowFeedback] = React.useState(false);
 
     const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([]);
@@ -68,8 +69,6 @@ export default function QuizPage() {
     const isQuizFinished = isLastQuestion && showFeedback;
 
     React.useEffect(() => {
-        // Timer only runs when the user is answering a question (showFeedback is false)
-        // and the quiz is not finished yet.
         if (showFeedback || isQuizFinished) {
             return;
         }
@@ -79,15 +78,12 @@ export default function QuizPage() {
                 if (prevTime <= 1) {
                     clearInterval(timer);
                     alert("Waktu Habis!");
-                    // Handle time up logic here, e.g., auto-submit
                     return 0;
                 }
                 return prevTime - 1;
             });
         }, 1000);
 
-        // Cleanup function to clear the interval when the component unmounts
-        // or when the dependencies (showFeedback, isQuizFinished) change.
         return () => clearInterval(timer);
     }, [showFeedback, isQuizFinished]);
 
@@ -97,16 +93,21 @@ export default function QuizPage() {
         return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     };
 
+    const handleLockAnswer = () => {
+        const studentAnswer = currentQuestion.type === "Pilihan Ganda" ? selectedOption : essayAnswer;
+        if (!studentAnswer) return;
+        setIsAnswerLocked(true);
+    }
 
     const handleAnswerSubmit = async () => {
+        if (!isAnswerLocked) return;
+        
         let studentAnswer = currentQuestion.type === "Pilihan Ganda" ? selectedOption : essayAnswer;
-        if (!studentAnswer) return;
-
+        
         setShowFeedback(true);
         setIsAwaitingFeedback(true);
 
         let isCorrect = studentAnswer.toLowerCase() === currentQuestion.correctAnswer.toLowerCase();
-        // Simple check for essay, not robust
         if (currentQuestion.type === 'Essay') {
             isCorrect = studentAnswer.length > 10; 
         }
@@ -139,13 +140,13 @@ export default function QuizPage() {
 
     const handleNextQuestion = () => {
         setShowFeedback(false);
+        setIsAnswerLocked(false);
         setSelectedOption("");
         setEssayAnswer("");
         setChatMessages([]);
         if (!isLastQuestion) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         } else {
-            // In a real app, you would navigate to a results page.
             alert("Quiz Selesai! Anda akan diarahkan ke halaman hasil.");
         }
     };
@@ -159,7 +160,6 @@ export default function QuizPage() {
         setChatInput("");
         setIsSendingMessage(true);
 
-        // A mock AI response for chat. In a real app, this would call the AI.
         setTimeout(() => {
             const aiResponse: ChatMessage = { role: "ai", content: "Itu pertanyaan yang bagus! Cerebellum memang krusial untuk koordinasi motorik halus, seperti menulis atau bermain musik, selain keseimbangan. Bagian lain seperti cerebrum lebih ke fungsi luhur seperti berpikir dan bahasa." };
             setChatMessages(prev => [...prev, aiResponse]);
@@ -188,11 +188,11 @@ export default function QuizPage() {
                     <h2 className="text-xl font-semibold mb-4">{currentQuestion.question}</h2>
 
                     {currentQuestion.type === "Pilihan Ganda" && (
-                        <RadioGroup value={selectedOption} onValueChange={setSelectedOption} disabled={showFeedback} className="space-y-2">
+                        <RadioGroup value={selectedOption} onValueChange={setSelectedOption} disabled={isAnswerLocked || showFeedback} className="space-y-2">
                             {currentQuestion.options.map((option, index) => (
                                 <Label key={index} htmlFor={`option-${index}`} className={cn(
                                     "flex items-center space-x-3 p-3 rounded-lg border transition-colors",
-                                    "cursor-pointer hover:bg-muted",
+                                    (isAnswerLocked || showFeedback) ? "cursor-not-allowed" : "cursor-pointer hover:bg-muted",
                                     selectedOption === option && "bg-muted border-primary",
                                     showFeedback && option === currentQuestion.correctAnswer && "bg-green-100 border-green-400",
                                     showFeedback && selectedOption === option && option !== currentQuestion.correctAnswer && "bg-red-100 border-red-400"
@@ -210,7 +210,7 @@ export default function QuizPage() {
                             className="min-h-[150px]"
                             value={essayAnswer}
                             onChange={(e) => setEssayAnswer(e.target.value)}
-                            disabled={showFeedback}
+                            disabled={isAnswerLocked || showFeedback}
                         />
                     )}
                 </CardContent>
@@ -218,9 +218,15 @@ export default function QuizPage() {
 
             {!showFeedback ? (
                 <div className="flex justify-end">
-                    <Button onClick={handleAnswerSubmit} disabled={currentQuestion.type === "Pilihan Ganda" ? !selectedOption : !essayAnswer}>
-                        Jawab & Lihat Feedback <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                    {!isAnswerLocked ? (
+                         <Button onClick={handleLockAnswer} disabled={currentQuestion.type === "Pilihan Ganda" ? !selectedOption : !essayAnswer}>
+                            Kunci Jawaban <Lock className="ml-2 h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <Button onClick={handleAnswerSubmit}>
+                            Lihat Feedback & Diskusi AI <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    )}
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 gap-6">
@@ -313,4 +319,3 @@ export default function QuizPage() {
     );
 }
 
-    
