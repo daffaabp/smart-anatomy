@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Bot, FileUp, PlusCircle, Trash2, Pencil, Eye, Send, Loader2, Settings, Copy, Clock, Users } from "lucide-react"
+import { Bot, FileUp, PlusCircle, Trash2, Pencil, Eye, Send, Loader2, Settings, Copy, Clock, Users, Shuffle } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Dialog,
@@ -23,6 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { aiChat, AIChatInput } from "@/ai/flows/ai-chat-interface"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 
 const initialGeneratedQuestions = [
     { type: "Pilihan Ganda", question: "Bagian otak mana yang bertanggung jawab untuk mengatur keseimbangan dan koordinasi motorik?", options: ["Cerebrum", "Cerebellum", "Medulla Oblongata", "Pons"], answer: "Cerebellum" },
@@ -43,7 +44,6 @@ type Question = {
 }
 
 export default function SmartQuizPage() {
-    const [isGenerating, setIsGenerating] = React.useState(false);
     const [quizGenerated, setQuizGenerated] = React.useState(false);
     const [generatedQuestions, setGeneratedQuestions] = React.useState<Question[]>([]);
     
@@ -52,8 +52,6 @@ export default function SmartQuizPage() {
     ]);
     const [chatInput, setChatInput] = React.useState("");
     const [isSendingMessage, setIsSendingMessage] = React.useState(false);
-    const [generatedCode, setGeneratedCode] = React.useState("");
-
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,7 +102,7 @@ export default function SmartQuizPage() {
                     <CardDescription>Berikan perintah kepada AI untuk men-generate soal kuis.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 overflow-y-auto p-4">
-                    <ScrollArea className="h-full pr-4">
+                    <ScrollArea className="h-full pr-4 min-h-[300px]">
                         <div className="space-y-4">
                             {chatMessages.map((msg, index) => (
                                 <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' && 'justify-end')}>
@@ -214,6 +212,10 @@ export default function SmartQuizPage() {
                                 <SelectItem value="kelas-b">Kelas B - Anatomi & Fisiologi</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="shuffle-questions" className="flex items-center gap-2"><Shuffle className="w-4 h-4"/> Acak Soal</Label>
+                        <Switch id="shuffle-questions" disabled={!quizGenerated}/>
                     </div>
                      <Dialog>
                         <DialogTrigger asChild>

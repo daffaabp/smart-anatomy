@@ -1,3 +1,4 @@
+
 "use client";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ export default function QuizPage() {
     const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([]);
     const [chatInput, setChatInput] = React.useState("");
     const [isSendingMessage, setIsSendingMessage] = React.useState(false);
+    const [isAwaitingFeedback, setIsAwaitingFeedback] = React.useState(false);
 
 
     const currentQuestion = quizQuestions[currentQuestionIndex];
@@ -64,6 +66,11 @@ export default function QuizPage() {
 
     const handleAnswerSubmit = async () => {
         let studentAnswer = currentQuestion.type === "Pilihan Ganda" ? selectedOption : essayAnswer;
+        if (!studentAnswer) return;
+
+        setShowFeedback(true);
+        setIsAwaitingFeedback(true);
+
         let isCorrect = studentAnswer.toLowerCase() === currentQuestion.correctAnswer.toLowerCase();
         // Simple check for essay, not robust
         if (currentQuestion.type === 'Essay') {
@@ -76,7 +83,6 @@ export default function QuizPage() {
             isCorrect: isCorrect,
         };
         setAnswers([...answers, newAnswer]);
-        setShowFeedback(true);
 
         const aiFeedbackPrompt: GetQuizFeedbackInput = {
             question: currentQuestion.question,
@@ -86,8 +92,15 @@ export default function QuizPage() {
             completeness: 0.8, speed: 0.7, effort: 0.9, learningProgress: 0.6, engagement: 0.85, learningBehavior: 0.75
         };
 
-        const result = await getQuizFeedback(aiFeedbackPrompt);
-        setChatMessages([{ role: "ai", content: result.feedback }]);
+        try {
+            const result = await getQuizFeedback(aiFeedbackPrompt);
+            setChatMessages([{ role: "ai", content: result.feedback }]);
+        } catch (error) {
+            setChatMessages([{ role: "ai", content: "Maaf, terjadi kesalahan saat mengambil feedback dari AI." }]);
+            console.error(error);
+        } finally {
+            setIsAwaitingFeedback(false);
+        }
     };
 
     const handleNextQuestion = () => {
@@ -98,8 +111,8 @@ export default function QuizPage() {
         if (!isLastQuestion) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         } else {
-            // Handle quiz completion
-            alert("Quiz Selesai!");
+            // In a real app, you would navigate to a results page.
+            alert("Quiz Selesai! Anda akan diarahkan ke halaman hasil.");
         }
     };
     
@@ -122,23 +135,31 @@ export default function QuizPage() {
 
 
     return (
-        <div className="container mx-auto p-4 flex flex-col gap-6">
+        <div className="container mx-auto p-4 flex flex-col gap-6 max-w-4xl">
             <Card>
                 <CardHeader>
-                    <CardTitle>Quiz: Sistem Saraf</CardTitle>
-                    <CardDescription>Soal {currentQuestionIndex + 1} dari {quizQuestions.length}</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <CardTitle>Quiz: Sistem Saraf</CardTitle>
+                        <CardDescription>Soal {currentQuestionIndex + 1} dari {quizQuestions.length}</CardDescription>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Progress value={progress} className="mb-6" />
                     <h2 className="text-xl font-semibold mb-4">{currentQuestion.question}</h2>
 
                     {currentQuestion.type === "Pilihan Ganda" && (
-                        <RadioGroup value={selectedOption} onValueChange={setSelectedOption} disabled={showFeedback}>
+                        <RadioGroup value={selectedOption} onValueChange={setSelectedOption} disabled={showFeedback} className="space-y-2">
                             {currentQuestion.options.map((option, index) => (
-                                <div key={index} className="flex items-center space-x-2">
+                                <Label key={index} htmlFor={`option-${index}`} className={cn(
+                                    "flex items-center space-x-3 p-3 rounded-lg border transition-colors",
+                                    "cursor-pointer hover:bg-muted",
+                                    selectedOption === option && "bg-muted border-primary",
+                                    showFeedback && option === currentQuestion.correctAnswer && "bg-green-100 border-green-400",
+                                    showFeedback && selectedOption === option && option !== currentQuestion.correctAnswer && "bg-red-100 border-red-400"
+                                )}>
                                     <RadioGroupItem value={option} id={`option-${index}`} />
-                                    <Label htmlFor={`option-${index}`}>{option}</Label>
-                                </div>
+                                    <span>{option}</span>
+                                </Label>
                             ))}
                         </RadioGroup>
                     )}
@@ -158,7 +179,7 @@ export default function QuizPage() {
             {!showFeedback ? (
                 <div className="flex justify-end">
                     <Button onClick={handleAnswerSubmit} disabled={currentQuestion.type === "Pilihan Ganda" ? !selectedOption : !essayAnswer}>
-                        Jawab & Lihat Feedback
+                        Jawab & Lihat Feedback <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             ) : (
@@ -175,23 +196,30 @@ export default function QuizPage() {
                         <CardContent className="flex flex-col h-[400px]">
                             <ScrollArea className="flex-1 pr-4">
                                 <div className="space-y-4">
-                                    {chatMessages.map((msg, index) => (
-                                        <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' && 'justify-end')}>
-                                            {msg.role === 'ai' && (
-                                                <Avatar className="w-8 h-8 border">
-                                                    <AvatarFallback>AI</AvatarFallback>
-                                                </Avatar>
-                                            )}
-                                            <div className={cn("p-3 rounded-lg max-w-[85%]", msg.role === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
-                                                <p className="text-sm">{msg.content}</p>
-                                            </div>
-                                            {msg.role === 'user' && (
-                                                <Avatar className="w-8 h-8 border">
-                                                    <AvatarFallback>SM</AvatarFallback>
-                                                </Avatar>
-                                            )}
+                                    {isAwaitingFeedback ? (
+                                        <div className="flex items-start gap-3">
+                                            <Avatar className="w-8 h-8 border bg-primary text-primary-foreground"><AvatarFallback>AI</AvatarFallback></Avatar>
+                                            <div className="bg-muted p-3 rounded-lg flex items-center"><Loader2 className="w-5 h-5 animate-spin mr-2"/> AI sedang menganalisis jawabanmu...</div>
                                         </div>
-                                    ))}
+                                    ) : (
+                                        chatMessages.map((msg, index) => (
+                                            <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' && 'justify-end')}>
+                                                {msg.role === 'ai' && (
+                                                    <Avatar className="w-8 h-8 border bg-primary text-primary-foreground">
+                                                        <AvatarFallback>AI</AvatarFallback>
+                                                    </Avatar>
+                                                )}
+                                                <div className={cn("p-3 rounded-lg max-w-[85%]", msg.role === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
+                                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                </div>
+                                                {msg.role === 'user' && (
+                                                    <Avatar className="w-8 h-8 border">
+                                                        <AvatarFallback>SM</AvatarFallback>
+                                                    </Avatar>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
                                     {isSendingMessage && (
                                          <div className="flex items-start gap-3">
                                             <Avatar className="w-8 h-8 border"><AvatarFallback>AI</AvatarFallback></Avatar>
@@ -206,9 +234,9 @@ export default function QuizPage() {
                                     onChange={(e) => setChatInput(e.target.value)}
                                     placeholder="Tanya apa saja tentang soal ini..."
                                     className="pr-12"
-                                    disabled={isSendingMessage}
+                                    disabled={isSendingMessage || isAwaitingFeedback}
                                 />
-                                <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" disabled={isSendingMessage}>
+                                <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" disabled={isSendingMessage || isAwaitingFeedback}>
                                     <Send className="h-4 w-4" />
                                 </Button>
                             </form>
@@ -244,3 +272,5 @@ export default function QuizPage() {
         </div>
     );
 }
+
+    
