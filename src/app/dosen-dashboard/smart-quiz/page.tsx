@@ -29,6 +29,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 
 const activeCodes = [
   { name: "Quiz Sistem Saraf", code: "ANF-QUIZ-2401", expires: "2024-07-30 23:59", usage: 45, total: 50, status: "Active" },
