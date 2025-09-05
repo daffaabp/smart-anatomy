@@ -1,4 +1,5 @@
 "use client"
+import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -7,8 +8,27 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Bot, Copy, FileUp, PlusCircle, Trash2 } from "lucide-react"
+import { Bot, Copy, FileUp, PlusCircle, Trash2, Pencil, Eye, Send } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from "@/components/ui/dialog"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const activeCodes = [
   { name: "Quiz Sistem Saraf", code: "ANF-QUIZ-2401", expires: "2024-07-30 23:59", usage: 45, total: 50, status: "Active" },
@@ -16,7 +36,25 @@ const activeCodes = [
   { name: "Quiz Pendahuluan", code: "ANF-QUIZ-2312", expires: "2024-06-01 23:59", usage: 50, total: 50, status: "Expired" },
 ]
 
+const generatedQuestions = [
+    { type: "Pilihan Ganda", question: "Bagian otak mana yang bertanggung jawab untuk mengatur keseimbangan dan koordinasi motorik?", options: ["Cerebrum", "Cerebellum", "Medulla Oblongata", "Pons"], answer: "Cerebellum" },
+    { type: "Essay", question: "Jelaskan proses transmisi sinyal saraf melalui sinapsis kimiawi." },
+    { type: "Benar/Salah", question: "Saraf otonom simpatis memicu respons 'fight or flight'." },
+    { type: "Pilihan Ganda", question: "Neuron sensorik membawa informasi dari... ke...", options: ["PNS ke CNS", "CNS ke PNS", "Otot ke Kelenjar", "CNS ke Otot"], answer: "PNS ke CNS"},
+    { type: "Essay", question: "Deskripsikan perbedaan utama antara sistem saraf simpatis dan parasimpatis." }
+]
+
 export default function SmartQuizPage() {
+    const [isGenerating, setIsGenerating] = React.useState(false);
+    const [quizGenerated, setQuizGenerated] = React.useState(false);
+    
+    const handleGenerateQuiz = () => {
+        setIsGenerating(true);
+        setTimeout(() => {
+            setIsGenerating(false);
+            setQuizGenerated(true);
+        }, 2000);
+    }
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -32,8 +70,8 @@ export default function SmartQuizPage() {
         <TabsContent value="create">
           <Card>
             <CardHeader>
-              <CardTitle>Upload Materi</CardTitle>
-              <CardDescription>Upload materi pelajaran untuk dibuatkan quiz secara otomatis oleh AI.</CardDescription>
+              <CardTitle>Buat Quiz dengan AI</CardTitle>
+              <CardDescription>Upload materi, tulis konten, atau gunakan AI assistant untuk membuat quiz secara otomatis.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
@@ -44,13 +82,59 @@ export default function SmartQuizPage() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="quiz-title">Atau buat manual</Label>
+                <Label htmlFor="quiz-title">Atau buat manual dari teks</Label>
                 <Textarea placeholder="Tulis atau paste konten materi disini... AI akan membuat soal dari sini." className="mt-2 min-h-[150px]" />
               </div>
               <div className="flex justify-end">
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Generate Quiz
-                </Button>
+                <Dialog open={quizGenerated} onOpenChange={setQuizGenerated}>
+                    <Button onClick={handleGenerateQuiz} disabled={isGenerating}>
+                        {isGenerating ? (
+                            <>
+                                <Bot className="mr-2 h-4 w-4 animate-spin" />
+                                Memproses...
+                            </>
+                        ) : (
+                            <>
+                                <PlusCircle className="mr-2 h-4 w-4" /> Generate Quiz
+                            </>
+                        )}
+                    </Button>
+                    <DialogContent className="max-w-4xl">
+                        <DialogHeader>
+                        <DialogTitle>Hasil Quiz Dibuat AI</DialogTitle>
+                        <DialogDescription>Berikut adalah soal-soal yang berhasil dibuat berdasarkan materi Anda. Anda bisa mengedit atau langsung mempublikasikannya.</DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="max-h-[60vh] p-4 border rounded-md">
+                            <div className="space-y-6">
+                                {generatedQuestions.map((q, index) => (
+                                    <div key={index} className="p-4 border rounded-lg">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-semibold">{index + 1}. ({q.type}) {q.question}</p>
+                                                {q.options && (
+                                                    <div className="mt-2 space-y-1 text-sm">
+                                                        {q.options.map((opt, i) => (
+                                                            <p key={i} className={cn("ml-4", q.answer === opt && "text-green-600 font-bold")}>{String.fromCharCode(97 + i)}. {opt}</p>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <Button variant="ghost" size="icon" className="shrink-0">
+                                                <Pencil className="w-4 h-4"/>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                        <DialogFooter>
+                        <Button variant="outline" onClick={() => setQuizGenerated(false)}>Edit Lagi</Button>
+                        <Button>
+                            <Send className="mr-2 h-4 w-4" /> Publikasikan & Buat Kode
+                        </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
@@ -87,7 +171,25 @@ export default function SmartQuizPage() {
                       </TableCell>
                       <TableCell className="flex gap-2">
                         <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
-                        <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Apakah Anda yakin?</DialogTitle>
+                                    <DialogDescription>
+                                        Tindakan ini akan mencabut kode quiz '{item.code}' dan tidak dapat diurungkan. Mahasiswa tidak akan bisa lagi menggunakan kode ini.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button variant="outline">Batal</Button>
+                                    </DialogClose>
+                                    <Button variant="destructive">Ya, Cabut Kode</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -1,3 +1,5 @@
+"use client"
+import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -6,16 +8,44 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Edit, Eye, FileUp, PlusCircle, Trash2 } from "lucide-react"
+import { Calendar, Edit, Eye, FileUp, PlusCircle, Trash2, Bot, ChevronRight } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const tasks = [
-  { name: "Analisis Kasus Klinis", class: "Kelas A", deadline: "2024-08-15", submissions: 35, total: 50, status: "Published" },
-  { name: "Laporan Praktikum Otot", class: "Kelas A", deadline: "2024-08-10", submissions: 48, total: 50, status: "Grading" },
-  { name: "Presentasi Sistem Endokrin", class: "Kelas A", deadline: "2024-07-20", submissions: 50, total: 50, status: "Complete" },
-  { name: "Rancangan Tugas Akhir", class: "Kelas A", deadline: "2024-09-01", submissions: 0, total: 50, status: "Draft" },
+  { id: 1, name: "Analisis Kasus Klinis", class: "Kelas A", deadline: "2024-08-15", submissions: 35, total: 50, status: "Published" },
+  { id: 2, name: "Laporan Praktikum Otot", class: "Kelas A", deadline: "2024-08-10", submissions: 48, total: 50, status: "Grading" },
+  { id: 3, name: "Presentasi Sistem Endokrin", class: "Kelas A", deadline: "2024-07-20", submissions: 50, total: 50, status: "Complete" },
+  { id: 4, name: "Rancangan Tugas Akhir", class: "Kelas A", deadline: "2024-09-01", submissions: 0, total: 50, status: "Draft" },
 ]
 
+const submissions = [
+    { studentName: "Ahmad Subarjo", studentAvatar: "AS", submissionDate: "2024-08-09", score: null, status: "Perlu Dinilai" },
+    { studentName: "Bunga Citra", studentAvatar: "BC", submissionDate: "2024-08-10", score: null, status: "Perlu Dinilai" },
+    { studentName: "Candra Darusman", studentAvatar: "CD", submissionDate: "2024-08-08", score: 88, status: "Sudah Dinilai" },
+]
+
+
 export default function AssignmentsPage() {
+    const [selectedTask, setSelectedTask] = React.useState<(typeof tasks)[0] | null>(null);
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -66,9 +96,51 @@ export default function AssignmentsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="flex gap-2">
-                        <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
-                        <Button variant="outline" size="icon"><Edit className="h-4 w-4" /></Button>
-                        <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
+                        </SheetTrigger>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" size="icon"><Edit className="h-4 w-4" /></Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Edit Tugas</DialogTitle>
+                                    <DialogDescription>Lakukan perubahan pada detail tugas di bawah ini.</DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="task-title-edit">Judul Tugas</Label>
+                                        <Input id="task-title-edit" defaultValue={task.name} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="task-description-edit">Deskripsi</Label>
+                                        <Textarea id="task-description-edit" defaultValue="Jelaskan detail tugas, tujuan, dan instruksi pengerjaan." className="min-h-[120px]" />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <DialogClose asChild><Button variant="outline">Batal</Button></DialogClose>
+                                    <Button>Simpan Perubahan</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Hapus Tugas?</DialogTitle>
+                                    <DialogDescription>
+                                        Tindakan ini akan menghapus tugas '{task.name}' dan semua data pengumpulan terkait. Aksi ini tidak dapat diurungkan.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <DialogClose asChild><Button variant="outline">Batal</Button></DialogClose>
+                                    <Button variant="destructive">Ya, Hapus</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -79,43 +151,55 @@ export default function AssignmentsPage() {
         </TabsContent>
 
         <TabsContent value="create">
-          <Card>
-            <CardHeader>
-              <CardTitle>Buat Tugas Baru</CardTitle>
-              <CardDescription>Isi detail tugas di bawah ini.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="task-title">Judul Tugas</Label>
-                <Input id="task-title" placeholder="cth. Laporan Praktikum Sistem Saraf" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="task-description">Deskripsi</Label>
-                <Textarea id="task-description" placeholder="Jelaskan detail tugas, tujuan, dan instruksi pengerjaan." className="min-h-[150px]" />
-              </div>
-              <div className="space-y-2">
-                <Label>Materi Pendukung</Label>
-                <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Upload file</p>
+            <Card>
+                <CardHeader>
+                <CardTitle>Buat Tugas Baru</CardTitle>
+                <CardDescription>Isi detail tugas, upload materi, dan gunakan AI untuk membuat rubrik penilaian.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="task-title">Judul Tugas</Label>
+                            <Input id="task-title" placeholder="cth. Laporan Praktikum Sistem Saraf" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="task-description">Deskripsi Tugas</Label>
+                            <Textarea id="task-description" placeholder="Jelaskan detail tugas, tujuan, dan instruksi pengerjaan." className="min-h-[150px]" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Materi Pendukung (Opsional)</Label>
+                            <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                                    <p className="text-sm text-muted-foreground">Upload file</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="task-deadline">Batas Waktu</Label>
+                            <div className="relative">
+                                <Input id="task-deadline" type="date" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                         <div className="space-y-2">
+                            <Label>Rubrik Penilaian</Label>
+                            <Textarea id="task-rubric" placeholder="Tulis kriteria penilaian disini, atau biarkan AI membuatnya untuk Anda." className="min-h-[268px]" />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                            <Bot className="mr-2 h-4 w-4" /> Buat Rubrik dengan AI
+                        </Button>
                     </div>
                 </div>
-              </div>
-               <div className="space-y-2">
-                <Label htmlFor="task-deadline">Batas Waktu</Label>
-                <div className="relative">
-                    <Input id="task-deadline" type="date" />
-                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="flex justify-end">
+                    <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Publikasikan Tugas
+                    </Button>
                 </div>
-              </div>
-              <div className="flex justify-end">
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Publikasikan Tugas
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+            </Card>
         </TabsContent>
         
         <TabsContent value="grade">
@@ -125,11 +209,74 @@ export default function AssignmentsPage() {
               <CardDescription>Pilih tugas untuk memulai penilaian dengan bantuan AI.</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-12">Fitur penilaian hybrid akan tersedia di sini. Pilih tugas dari daftar untuk melihat pengumpulan mahasiswa dan memulai penilaian.</p>
+              {selectedTask ? (
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">Menilai: {selectedTask.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Total Pengumpulan: {selectedTask.submissions}/{selectedTask.total}</p>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Mahasiswa</TableHead>
+                        <TableHead>Tanggal Kumpul</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Skor</TableHead>
+                        <TableHead>Aksi</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {submissions.map(sub => (
+                        <TableRow key={sub.studentName}>
+                          <TableCell className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8"><AvatarFallback>{sub.studentAvatar}</AvatarFallback></Avatar>
+                            {sub.studentName}
+                          </TableCell>
+                          <TableCell>{sub.submissionDate}</TableCell>
+                          <TableCell>
+                            <Badge variant={sub.status === "Perlu Dinilai" ? "destructive" : "default"}>{sub.status}</Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">{sub.score ?? "-"}</TableCell>
+                          <TableCell>
+                            <Button variant="outline" size="sm">
+                                Nilai Sekarang <ChevronRight className="ml-2 h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-12">
+                  <p className="mb-4">Pilih tugas dari daftar untuk melihat pengumpulan mahasiswa.</p>
+                  <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    {tasks.filter(t => t.status === 'Grading' || t.status === 'Complete').map(task => (
+                      <Button key={task.id} variant="outline" onClick={() => setSelectedTask(task)}>
+                        {task.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+      <Sheet>
+        <SheetContent className="w-[400px] sm:w-[540px]">
+            <SheetHeader>
+            <SheetTitle>Detail Tugas: Analisis Kasus Klinis</SheetTitle>
+            <SheetDescription>
+                Informasi lengkap mengenai tugas, termasuk deskripsi, materi, dan daftar mahasiswa yang sudah & belum mengumpulkan.
+            </SheetDescription>
+            </SheetHeader>
+            <div className="py-4 space-y-4">
+                <p className="text-sm text-muted-foreground">
+                    <strong>Deskripsi:</strong> Analisis kasus klinis terkait gangguan sistem saraf. Jelaskan patofisiologi, diagnosis, dan penanganan yang relevan berdasarkan materi yang telah diberikan.
+                </p>
+                <p className="text-sm text-muted-foreground"><strong>Batas Waktu:</strong> 2024-08-15</p>
+            </div>
+        </SheetContent>
+    </Sheet>
     </div>
   )
 }
