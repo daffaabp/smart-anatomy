@@ -22,11 +22,13 @@ import {
     FileText,
     LogOut,
     Menu,
+    BookCopy,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
     { href: "/mhs-dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/mhs-dashboard/materi", icon: BookCopy, label: "Materi & Perkuliahan" },
     { href: "/mhs-dashboard/smart-quiz", icon: BookCheck, label: "Smart Quiz" },
     { href: "/mhs-dashboard/assignments", icon: FileText, label: "Tugas Saya" },
 ];
