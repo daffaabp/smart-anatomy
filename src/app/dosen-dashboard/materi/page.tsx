@@ -1,9 +1,13 @@
 
 "use client"
+import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookUp, FileText, Film, GripVertical, Link as LinkIcon, PenSquare, PlusCircle, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const courseStructure = [
     {
@@ -61,9 +65,27 @@ export default function DosenMateriPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Struktur Mata Kuliah</h1>
                     <p className="text-muted-foreground">Atur bab, materi, dan tugas untuk kelas Anda di sini.</p>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Tambah Bab Baru
-                </Button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Tambah Bab Baru
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Buat Bab Baru</DialogTitle>
+                            <DialogDescription>Masukkan judul untuk bab atau topik perkuliahan yang baru.</DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <Label htmlFor="bab-title">Judul Bab</Label>
+                            <Input id="bab-title" placeholder="cth. Sistem Kardiovaskular" />
+                        </div>
+                        <DialogFooter>
+                            <DialogClose asChild><Button variant="outline">Batal</Button></DialogClose>
+                            <Button>Simpan Bab</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             <Card>
@@ -71,8 +93,8 @@ export default function DosenMateriPage() {
                      <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
                         {courseStructure.map((bab, index) => (
                             <AccordionItem value={`item-${index+1}`} key={index}>
-                                <div className="flex items-center w-full">
-                                    <AccordionTrigger className="hover:no-underline flex-grow">
+                                <div className="flex items-center w-full group">
+                                    <AccordionTrigger className="hover:no-underline flex-grow p-4">
                                         <div className="flex items-center gap-4 w-full">
                                             <GripVertical className="h-5 w-5 text-muted-foreground" />
                                             <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground font-bold text-lg shrink-0">
@@ -84,7 +106,7 @@ export default function DosenMateriPage() {
                                             </div>
                                         </div>
                                     </AccordionTrigger>
-                                    <div className="flex items-center gap-2 pr-4">
+                                    <div className="flex items-center gap-2 pr-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Button variant="ghost" size="icon"><PenSquare className="h-4 w-4"/></Button>
                                         <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive"/></Button>
                                     </div>
@@ -95,39 +117,56 @@ export default function DosenMateriPage() {
                                         {/* Materials Section */}
                                         <div className="space-y-3">
                                             {bab.materials.map(material => (
-                                                <div key={material.title} className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-muted/50">
+                                                <div key={material.title} className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-muted/50 group">
                                                     <div className="flex items-center gap-3">
                                                         <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                                                         {getIcon(material.type)}
                                                         <span className="font-medium text-sm">{material.title}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="w-4 h-4 text-destructive" /></Button>
                                                     </div>
                                                 </div>
                                             ))}
-                                            <Button variant="outline" size="sm" className="w-full border-dashed">
-                                                <BookUp className="mr-2 h-4 w-4" /> Tambah Materi
-                                            </Button>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="outline" size="sm" className="w-full border-dashed">
+                                                        <BookUp className="mr-2 h-4 w-4" /> Tambah Materi
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Tambah Materi Baru</DialogTitle>
+                                                        <DialogDescription>Upload file atau tambahkan link materi untuk bab ini.</DialogDescription>
+                                                    </DialogHeader>
+                                                    {/* Add form for adding material here */}
+                                                    <DialogFooter>
+                                                        <DialogClose asChild><Button variant="outline">Batal</Button></DialogClose>
+                                                        <Button>Simpan Materi</Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
                                         </div>
 
                                         {/* Tasks Section */}
                                         <div className="space-y-3">
                                             {bab.tasks.map(task => (
-                                                <div key={task.title} className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-muted/50">
+                                                <div key={task.title} className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-muted/50 group">
                                                     <div className="flex items-center gap-3">
                                                         <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                                                         {getIcon(task.type)}
                                                         <p className="font-medium text-sm">{task.title}</p>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="w-4 h-4 text-destructive" /></Button>
                                                     </div>
                                                 </div>
                                             ))}
-                                            <Button variant="outline" size="sm" className="w-full border-dashed">
-                                                <PenSquare className="mr-2 h-4 w-4" /> Tambah Tugas / Kuis
-                                            </Button>
+                                            <Link href="/dosen-dashboard/assignments?tab=create" passHref>
+                                                <Button variant="outline" size="sm" className="w-full border-dashed">
+                                                    <PenSquare className="mr-2 h-4 w-4" /> Tambah Tugas / Kuis
+                                                </Button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </AccordionContent>

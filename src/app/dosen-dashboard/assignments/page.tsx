@@ -1,6 +1,7 @@
 "use client"
 import * as React from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -45,6 +46,8 @@ const submissions = [
 
 
 export default function AssignmentsPage() {
+    const searchParams = useSearchParams();
+    const tab = searchParams.get("tab");
     const [selectedTask, setSelectedTask] = React.useState<(typeof tasks)[0] | null>(null);
 
   return (
@@ -54,7 +57,7 @@ export default function AssignmentsPage() {
         <p className="text-muted-foreground">Buat, distribusikan, dan nilai tugas mahasiswa dengan bantuan AI.</p>
       </div>
 
-      <Tabs defaultValue="manage" className="w-full">
+      <Tabs defaultValue={tab || "manage"} value={tab || "manage"} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="manage">Daftar Tugas</TabsTrigger>
           <TabsTrigger value="create">Buat Tugas Baru</TabsTrigger>
